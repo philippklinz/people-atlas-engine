@@ -47,7 +47,7 @@ export function expandCategories(ids, categories) {
   }
   return result;
 }
-export const normalizeSearch = text => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+export const normalizeSearch = text => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/[:*](?=innen\b)/g, '');
 export function selectPeople(people, categories, selected, query = '', language = 'en') {
   const accepted = expandCategories(selected, categories);
   const terms = normalizeSearch(query.trim()).split(/\s+/).filter(Boolean);

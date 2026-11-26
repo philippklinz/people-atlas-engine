@@ -3,6 +3,9 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const fs=require('node:fs'), path=require('node:path'), http=require('node:http'), assert=require('node:assert/strict');
 const engine=path.resolve(__dirname,'..');
 const content=process.env.ATLAS_CONTENT_DIR || path.resolve(engine,'../people-atlas-content');
+const catalogue=JSON.parse(fs.readFileSync(path.join(content,'catalog.json')));
+const contentCategories=JSON.parse(fs.readFileSync(path.join(content,catalogue.categories)));
+const records=catalogue.collections.flatMap(file=>JSON.parse(fs.readFileSync(path.join(content,file))));
 const output=path.join(engine,'qa');
 const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'application/json',css:'text/css',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',ttf:'font/ttf'};
 (async()=>{
@@ -31,9 +34,33 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
   fs.mkdirSync(output,{recursive:true});
   try{
     await page.goto(base+'/app/');await ready();
-    assert.equal(await page.locator('.category-card').count(),10);
+    assert.equal(await page.locator('.category-card').count(),contentCategories.length);
     assert.equal(await page.locator('[data-action="open"]').isDisabled(),true);
     await screenshot('overview-desktop');
+    // A cross-disciplinary category keeps mathematicians and combines without duplicates.
+    const women=records.filter(p=>p.categories.includes('women-in-science'));
+    const womenInMath=women.filter(p=>p.categories.includes('mathematicians'));
+    assert(womenInMath.length>0,'The collection must explicitly include mathematicians');
+    await page.locator('#category-women-in-science').check();
+    await page.locator('[data-action="open"]').click();
+    await page.waitForSelector('.person-label');
+    assert.equal(await page.locator('.person-label').count(),women.length);
+    await page.locator('#person-search').fill('Mathematikerinnen');
+    await page.waitForTimeout(300);
+    assert.deepEqual((await page.locator('.person-label').evaluateAll(links=>links.map(link=>link.dataset.person))).sort(),womenInMath.map(p=>p.id).sort());
+    await page.locator('#person-search').fill('');await page.waitForTimeout(300);
+    await page.waitForSelector('.vis-item.vis-range:visible');
+    await screenshot('women-timeline');
+    await page.locator('.category-editor summary').click();
+    await page.locator('#category-form input[value="mathematicians"]').check();
+    await page.locator('#category-form button[type="submit"]').click();
+    const combined=records.filter(p=>p.categories.includes('women-in-science')||p.categories.includes('mathematicians'));
+    assert.equal(await page.locator('.person-label').count(),combined.length);
+    assert.equal(await page.locator('.person-label[data-person="ada-lovelace"]').count(),1);
+    await page.goto(base+'/app/?lang=en&categories=women-in-science&view=timeline');await ready();
+    assert.equal(await page.locator('.person-label').count(),women.length,'English direct links preserve the category');
+    assert(await page.locator('.chips').textContent().then(text=>text.includes('Women in science and research')));
+    await page.goto(base+'/app/');await ready();
     await page.locator('#category-scientists').check();
     await page.locator('#category-mathematicians').check();
     await page.locator('[data-action="open"]').click();

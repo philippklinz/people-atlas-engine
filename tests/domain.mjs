@@ -23,6 +23,10 @@ export function runTests(){
   test('Parents include descendants without duplicate assignments',()=>eq(selectPeople(people,categories,['science']).map(p=>p.id),['test-one','test-three']));
   test('Empty selection means empty results',()=>eq(selectPeople(people,categories,[]),[]));
   test('Search handles diacritics and all terms',()=>eq(selectPeople(people,categories,['math'],'emilie test','en').map(p=>p.id),['test-one']));
+  test('Inclusive category labels match ordinary German feminine spelling',()=>{
+    const localized=categories.map(c=>c.id==='math'?{...c,name:{de:'Mathematiker:innen',en:'Mathematicians'}}:c);
+    for(const query of ['Mathematikerinnen','Mathematikerin','Mathematiker:innen','Mathematiker'])eq(selectPeople(people,localized,['math'],query,'de').map(p=>p.id),['test-one','test-three']);
+  });
   test('Civil years round-trip, including BCE and years 1–99',()=>{for(const year of [-10000,-100,-2,-1,1,2,10,99,100,1900,2200])eq(yearForDate(dateForYear(year)),year);});
   test('1 BCE is followed by 1 CE with no year zero',()=>{eq(dateForYear(-1).getUTCFullYear(),0);eq(dateForYear(1).getUTCFullYear(),1);eq(formatYear(-1,'en'),'1 BCE');});
   test('Uncertain dates retain their qualification',()=>{eq(formatDate({precision:'approximate',year:370},'de'),'ca. 370');eq(formatDate({precision:'range',earliest:350,latest:370},'en'),'350–370');});

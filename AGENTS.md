@@ -12,5 +12,6 @@ Read README.md and docs/DATA_MODEL.md before changing the application.
 - Views, people, language, filters and time windows have real URLs. Direct links and browser Back/Forward must work without local storage.
 - Dependencies, fonts, licenses and provenance are committed locally. Deliberately review upgrades and update vendor/manifest.json.
 - MO-13 targets all 24 EU languages. The current complete editions are de/en; the other 22 are planned. Do not advertise incomplete editions. Maintain source fingerprints and honest review status.
+- Use gender-inclusive German for generic person/group labels (for example Zeitgenoss:innen), or natural neutral wording. Category wording is maintained in the content repository.
 - Run the browser-based contract tests and appropriate browser checks for substantial UI changes. Node/Playwright are optional development tools only, never application dependencies.
 - Do not claim historical accuracy, native-language review or WCAG conformance from passing automated tests.

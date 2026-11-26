@@ -15,7 +15,7 @@ export const messages = {
     noResults:'Keine Personen gefunden.', noResultsHelp:'Ändere den Suchbegriff oder die Kategorien.', resetSearch:'Suche zurücksetzen',
     outOfRange:'In diesem Zeitraum sind keine Lebensspannen sichtbar.', showAll:'Gesamten Zeitraum zeigen', unknownDates:'Personen ohne darstellbare Lebensspanne: {count}. Du findest sie in der Liste.',
     name:'Name', dates:'Lebensdaten', fields:'Bereiche', noYearZero:'Jahre vor unserer Zeitrechnung sind mit „v. u. Z.“ gekennzeichnet. Es gibt kein Jahr null.',
-    close:'Schließen', biography:'Einordnung', highlights:'Werke & Beiträge', sources:'Quellen', sourceHint:'Die Links führen zu externen Quellen in ihrer Originalsprache.', contemporaries:'Zeitgenossen in deiner Auswahl', contemporariesHint:'Überschneidende Lebenszeiten belegen keinen persönlichen Kontakt.',
+    close:'Schließen', biography:'Einordnung', highlights:'Werke & Beiträge', sources:'Quellen', sourceHint:'Die Links führen zu externen Quellen in ihrer Originalsprache.', contemporaries:'Zeitgenoss:innen in deiner Auswahl', contemporariesHint:'Überschneidende Lebenszeiten belegen keinen persönlichen Kontakt.',
     focusPerson:'Lebenszeit in der Zeitleiste zeigen', born:'Geboren', died:'Gestorben', living:'Lebt', unknown:'Unbekannt', dateNote:'Zur Datierung',
     portraitCredit:'Bildnachweis', noPortrait:'Kein Porträt in dieser Sammlung', loading:'Die Sammlung wird geladen …', errorTitle:'Die Sammlung konnte nicht geladen werden.',
     errorHelp:'Prüfe deine Verbindung und versuche es erneut. Die Inhaltsquelle kann vorübergehend nicht erreichbar sein.', retry:'Erneut versuchen',
