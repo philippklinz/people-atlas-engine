@@ -4,7 +4,7 @@ Explore lives through time. A static, openly accessible Learning Lab for compari
 
 Select categories on the overview, then open their shared timeline. A person appears once even when several selected categories include them. Search, zoom, period presets, a readable list, source-backed biographies and URL navigation are included.
 
-The timeline fills the viewport. Search, category selection, time controls and settings sit in a collapsible left menu. Person details slide in from the right at 40% of the desktop width; the timeline remains usable alongside them. Narrow screens use a full-width person panel and a collapsible overlay menu.
+The timeline fills the viewport behind both panels. Search, category selection, time controls and settings sit in a collapsible left overlay; opening or closing it never shifts or resizes the timeline. Person details slide in from the right at 40% of the desktop width; the timeline remains usable alongside them. Narrow screens use a full-width person panel and an initially collapsed menu.
 
 ## Repositories
 
