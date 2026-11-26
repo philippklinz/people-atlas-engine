@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Menschen und ihre Zeit. Entdecke Lebenswege aus Wissenschaft, Philosophie, Kunst und Politik auf einer gemeinsamen Zeitleiste.">
+  <meta name="color-scheme" content="light dark">
+  <title>People Atlas — Menschen und ihre Zeit</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles/modern-objectivity.css">
+  <link rel="stylesheet" href="./vendor/vis/timeline.css">
+  <link rel="stylesheet" href="./styles/atlas.css">
+  <script type="module" src="./src/app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Zum Inhalt / Skip to content</a>
+  <div id="app"><main class="boot"><p class="mo-eyebrow">Learning Labs / People Atlas</p><h1>People Atlas</h1><p role="status">Der Atlas wird geladen … / Loading the atlas …</p></main></div>
+  <noscript><p class="boot">Diese interaktive Zeitleiste benötigt JavaScript. / This interactive timeline requires JavaScript.</p></noscript>
+  <dialog id="person-dialog" aria-labelledby="person-name"></dialog>
+  <dialog id="about-dialog" aria-labelledby="about-title"></dialog>
+  <div id="announcement" class="mo-sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+// Optional development-only Playwright runner. No package installation is needed to run the app.
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const fs=require('node:fs'), path=require('node:path'), http=require('node:http'), assert=require('node:assert/strict');
+const engine=path.resolve(__dirname,'..');
+const content=process.env.ATLAS_CONTENT_DIR || path.resolve(engine,'../people-atlas-content');
+const output=path.join(engine,'qa');
+const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'application/json',css:'text/css',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',ttf:'font/ttf'};
+(async()=>{
+  const server=http.createServer((req,res)=>{
+    const url=new URL(req.url,'http://localhost');
+    const base=url.pathname.startsWith('/content/')?content:engine;
+    let relative=decodeURIComponent(url.pathname.replace(/^\/(app|content)\//,''));
+    if(!relative || relative.endsWith('/'))relative+='index.html';
+    const file=path.resolve(base,relative);
+    if(!file.startsWith(base+path.sep)){res.writeHead(403);return res.end();}
+    try{const data=fs.readFileSync(file);res.setHeader('Content-Type',mime[file.split('.').pop()]||'application/octet-stream');res.end(data);}
+    catch{res.writeHead(404);res.end('Not found');}
+  });
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  const base='http://127.0.0.1:'+server.address().port;
+  const browser=await chromium.launch({headless:true,...(process.env.BROWSER_EXECUTABLE?{executablePath:process.env.BROWSER_EXECUTABLE}:{}),args:['--no-sandbox']});
+  const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
+  await context.route('**/atlas.config.json',route=>route.fulfill({json:{configVersion:1,defaultLanguage:'de',content:{catalogUrl:base+'/content/catalog.json'}}}));
+  const page=await context.newPage(),errors=[],requests=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  page.on('request',request=>requests.push(request.url()));
+  const ready=async()=>page.waitForSelector('html[data-ready="true"]');
+  const url=()=>new URL(page.url());
+  const noOverflow=async()=>assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Document must not overflow horizontally');
+  const screenshot=async name=>page.screenshot({path:path.join(output,name+'.png'),fullPage:true});
+  fs.mkdirSync(output,{recursive:true});
+  try{
+    await page.goto(base+'/app/');await ready();
+    assert.equal(await page.locator('.category-card').count(),10);
+    assert.equal(await page.locator('[data-action="open"]').isDisabled(),true);
+    await screenshot('overview-desktop');
+    await page.locator('#category-scientists').check();
+    await page.locator('#category-mathematicians').check();
+    await page.locator('[data-action="open"]').click();
+    await page.waitForSelector('.vis-timeline');
+    assert.equal(await page.locator('.person-label').count(),19,'Overlapping parent and child selections must be a union');
+    assert.equal(await page.locator('.person-label[data-person="rene-descartes"]').count(),1);
+    const ticks=await page.locator('.vis-time-axis .vis-text.vis-minor:visible').allTextContents();
+    assert(ticks.length<40,'Overview must not draw one tick per year');
+    assert(!ticks.some(t=>t.trim()==='0'),'There must be no year-zero tick');
+    await page.locator('#period-select').selectOption('early');
+    assert.equal(url().searchParams.get('from'),'1500');
+    assert.equal(await page.locator('.person-label').count(),5,'Only people alive in the selected period occupy timeline rows');
+    await page.waitForTimeout(300);
+    await screenshot('timeline-desktop');
+    const rangeBefore=url().searchParams.get('from');
+    await page.locator('[data-action="zoom-in"]').click();
+    assert.notEqual(url().searchParams.get('from'),rangeBefore);
+    await page.goBack();await page.waitForSelector('.vis-timeline');
+    assert.equal(url().searchParams.get('from'),rangeBefore,'Back restores the time window');
+    await page.locator('.person-label[data-person="rene-descartes"]').click();
+    await page.waitForSelector('#person-dialog[open]');
+    assert.equal(url().searchParams.get('person'),'rene-descartes');
+    await page.waitForFunction(()=>{const i=document.querySelector('#person-dialog img.portrait');return i&&i.complete&&i.naturalWidth>0;});
+    await screenshot('person-desktop');
+    await page.locator('#person-dialog [data-action="language"]').selectOption('en');
+    assert.equal(url().searchParams.get('person'),'rene-descartes');
+    assert.equal(await page.locator('html').getAttribute('lang'),'en');
+    assert.equal(url().searchParams.get('from'),rangeBefore,'Language switch preserves time');
+    await page.locator('#person-dialog [data-person="isaac-newton"]').click();
+    assert.equal(url().searchParams.get('person'),'isaac-newton');
+    await page.keyboard.press('Escape');await page.waitForSelector('#person-dialog[open]',{state:'hidden'});
+    assert.equal(url().searchParams.has('person'),false,'Close ends a sequence of person views');
+    await page.locator('#person-search').fill('curie');
+    await page.waitForTimeout(300);
+    assert.equal(await page.locator('.person-label').count(),1);
+    assert.match(await page.locator('.person-label').textContent(),/Curie/);
+    await page.locator('#person-search').fill('zzzzzzzz');
+    await page.waitForTimeout(300);
+    assert.equal(await page.locator('.empty h2').textContent(),'No people found.');
+    await page.locator('[data-action="reset-search"]').click();
+    await page.locator('[data-action="show-list"]').click();
+    assert.equal(await page.locator('tbody tr').count(),19);
+    await page.locator('[data-action="theme"]').click();
+    await screenshot('list-dark');
+    await page.locator('[data-action="show-timeline"]').click();
+    await page.locator('#timeline').focus();
+    const beforeArrow=url().searchParams.get('from');
+    await page.keyboard.press('ArrowRight');assert.notEqual(url().searchParams.get('from'),beforeArrow);
+    await page.locator('.manual-range summary').click();
+    await page.locator('#range-from').fill('0');await page.locator('#range-to').fill('100');
+    await page.locator('#range-form button').click();
+    assert((await page.locator('#range-error').textContent()).includes('year 0'));
+    await page.locator('#range-from').fill('-500');await page.locator('#range-to').fill('500');
+    await page.locator('#range-form button').click();
+    assert.equal(url().searchParams.get('from'),'-500');
+    for(const width of [768,390,320]){
+      await page.setViewportSize({width,height:900});await page.waitForTimeout(400);await noOverflow();
+      assert(await page.locator('.vis-timeline').count()===1,'Timeline remains mounted after resize');
+      assert(await page.locator('.person-label').count()>0,'People remain visible after resize');
+      await screenshot('timeline-'+width);
+    }
+    await page.goto(base+'/app/?person=marie-curie&lang=en');await ready();
+    await page.waitForSelector('#person-dialog[open]');
+    assert.match(await page.locator('#person-name').textContent(),/Curie/);
+    await noOverflow();await screenshot('person-mobile');
+    await page.keyboard.press('Escape');await page.waitForSelector('#person-dialog[open]',{state:'hidden'});
+    await page.goto(base+'/app/?lang=fr');await ready();
+    assert.equal(await page.locator('html').getAttribute('lang'),'de');
+    assert.match(await page.locator('.notice').textContent(),/noch nicht verfügbar/);
+    await screenshot('overview-mobile');await noOverflow();
+    await page.goto(base+'/app/tests/');await page.waitForSelector('html[data-tests="passed"]');
+    assert.deepEqual(errors,[]);
+    assert(requests.every(request=>new URL(request).origin===base),'Only the configured local sources may be loaded');
+    // Genuine failing collection, then successful user-initiated recovery.
+    await page.route('**/content/catalog.json',route=>route.fulfill({status:503,body:'Unavailable'}));
+    await page.goto(base+'/app/');await page.waitForSelector('html[data-ready="error"]');
+    assert.equal(await page.locator('[data-action="retry"]').count(),1);
+    await page.unroute('**/content/catalog.json');
+    await page.locator('[data-action="retry"]').click();await ready();
+    console.log('PASS browser journeys: selection union, timeline, portraits, history, links, search, language, dark theme, keyboard, BCE, 4 widths, fallback and recovery.');
+    console.log('Screenshots: '+output);
+  }finally{await browser.close();server.close();}
+})().catch(error=>{console.error(error);process.exit(1)});

@@ -1,0 +1,7 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>People Atlas contract tests</title><link rel="stylesheet" href="../styles/modern-objectivity.css"><main class="mo-content"><h1>Contract tests</h1><p>Synthetic fixtures; no historical correctness claim.</p><div id="results" role="status"></div></main><script type="module">
+import {runTests} from './domain.mjs';
+const results=runTests();const root=document.querySelector('#results');
+const summary=document.createElement('p');summary.textContent=results.filter(x=>x.ok).length+' / '+results.length+' passed';root.append(summary);
+const list=document.createElement('ul');for(const result of results){const item=document.createElement('li');item.textContent=(result.ok?'PASS: ':'FAIL: ')+result.name+(result.error?' — '+result.error:'');list.append(item);}root.append(list);
+document.documentElement.dataset.tests=results.every(x=>x.ok)?'passed':'failed';
+</script></html>

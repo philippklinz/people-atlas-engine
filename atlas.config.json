@@ -1,0 +1,7 @@
+{
+  "configVersion": 1,
+  "defaultLanguage": "de",
+  "content": {
+    "catalogUrl": "https://raw.githubusercontent.com/philippklinz/people-atlas-content/main/catalog.json"
+  }
+}
