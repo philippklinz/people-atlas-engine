@@ -25,4 +25,6 @@ Optional environment variables:
 
 The runner starts its own local server and routes the configuration only inside its isolated browser. It leaves atlas.config.json untouched. Screenshots are written to ignored qa/. It verifies category overlap, dates, time controls, search, list mode, person links, browser history, local portraits, language and theme preservation, keyboard operation, narrow layouts, unsupported-language fallback and failed-load recovery.
 
+Workspace checks cover viewport height without page scrolling, menu collapse and restored canvas width, the 40% right-hand person panel, timeline interaction while that panel is open, and the switch between non-modal desktop and modal narrow-screen details.
+
 Automated checks do not establish historical accuracy, native-language review or full assistive-technology conformance.

@@ -38,6 +38,18 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     await page.locator('#category-mathematicians').check();
     await page.locator('[data-action="open"]').click();
     await page.waitForSelector('.vis-timeline');
+    const canvas=await page.locator('#timeline').boundingBox();
+    assert.equal(canvas.y,0,'Timeline starts at the top of the viewport');
+    assert.equal(canvas.height,1000,'Timeline fills the viewport height');
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollHeight>innerHeight),false,'Workspace does not scroll as a page');
+    assert.equal(await page.locator('#workspace-menu #person-search').count(),1);
+    assert.equal(await page.locator('#workspace-menu #period-select').count(),1);
+    const openWidth=canvas.width;
+    await page.locator('[data-action="close-menu"]').click();
+    await page.waitForTimeout(150);
+    assert((await page.locator('#timeline').boundingBox()).width>openWidth,'Collapsing the menu releases canvas space');
+    assert.equal(await page.locator('#workspace-menu').evaluate(el=>el.inert),true);
+    await page.locator('[data-action="open-menu"]').click();
     assert.equal(await page.locator('.person-label').count(),19,'Overlapping parent and child selections must be a union');
     assert.equal(await page.locator('.person-label[data-person="rene-descartes"]').count(),1);
     const ticks=await page.locator('.vis-time-axis .vis-text.vis-minor:visible').allTextContents();
@@ -58,6 +70,19 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     assert.equal(url().searchParams.get('person'),'rene-descartes');
     await page.waitForFunction(()=>{const i=document.querySelector('#person-dialog img.portrait');return i&&i.complete&&i.naturalWidth>0;});
     await screenshot('person-desktop');
+    const panel=await page.locator('#person-dialog').boundingBox();
+    assert.equal(panel.width,1440*.4,'Person panel uses 40 percent of the desktop width');
+    assert.equal(panel.x+panel.width,1440,'Person panel is attached to the right edge');
+    assert.equal(panel.height,1000,'Person panel fills the viewport height');
+    assert.equal(await page.locator('#person-dialog').evaluate(el=>el.matches(':modal')),false);
+    await page.locator('[data-action="pan-right"]').click();
+    assert.equal(url().searchParams.get('person'),'rene-descartes','Timeline stays interactive with a person open');
+    await page.locator('[data-action="pan-left"]').click();
+    await page.setViewportSize({width:640,height:900});await page.waitForTimeout(300);
+    assert.equal(await page.locator('#person-dialog').evaluate(el=>el.matches(':modal')),true,'Narrow person panel manages modal focus');
+    assert.equal((await page.locator('#person-dialog').boundingBox()).width,640);
+    await page.setViewportSize({width:1440,height:1000});await page.waitForTimeout(300);
+    assert.equal(await page.locator('#person-dialog').evaluate(el=>el.matches(':modal')),false);
     await page.locator('#person-dialog [data-action="language"]').selectOption('en');
     assert.equal(url().searchParams.get('person'),'rene-descartes');
     assert.equal(await page.locator('html').getAttribute('lang'),'en');
@@ -95,6 +120,12 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
       assert(await page.locator('.person-label').count()>0,'People remain visible after resize');
       await screenshot('timeline-'+width);
     }
+    assert.equal(await page.locator('#workspace-menu').evaluate(el=>el.inert),true,'Narrow layouts start with a collapsed menu');
+    await page.locator('[data-action="open-menu"]').click();
+    await page.locator('#period-select').selectOption('modern');
+    await screenshot('menu-mobile');await noOverflow();
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('[data-action="open-menu"]').getAttribute('aria-expanded'),'false');
     await page.goto(base+'/app/?person=marie-curie&lang=en');await ready();
     await page.waitForSelector('#person-dialog[open]');
     assert.match(await page.locator('#person-name').textContent(),/Curie/);
@@ -113,7 +144,7 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     assert.equal(await page.locator('[data-action="retry"]').count(),1);
     await page.unroute('**/content/catalog.json');
     await page.locator('[data-action="retry"]').click();await ready();
-    console.log('PASS browser journeys: selection union, timeline, portraits, history, links, search, language, dark theme, keyboard, BCE, 4 widths, fallback and recovery.');
+    console.log('PASS browser journeys: fullscreen workspace, collapsible menu, responsive person panel, selection union, timeline, portraits, history, links, search, language, dark theme, keyboard, BCE, 4 widths, fallback and recovery.');
     console.log('Screenshots: '+output);
   }finally{await browser.close();server.close();}
 })().catch(error=>{console.error(error);process.exit(1)});

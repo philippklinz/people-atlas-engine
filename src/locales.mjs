@@ -1,5 +1,6 @@
 export const messages = {
   de: {
+    openMenu:'Menü öffnen', closeMenu:'Menü einklappen', controls:'Ansicht & Filter', timelineGuide:'Legende & Bedienung', settings:'Einstellungen', personDetails:'Personenansicht',
     title:'Menschen und ihre Zeit', description:'Entdecke Lebenswege aus Wissenschaft, Philosophie, Kunst und Politik auf einer gemeinsamen Zeitleiste.',
     atlas:'Der Atlas', categories:'Kategorien', timeline:'Zeitleiste', about:'Über den Atlas', language:'Sprache', theme:'Farbschema wechseln', light:'Hell', dark:'Dunkel',
     collection:'Eine Sammlung von Lebenswegen', hero:'Menschen und ihre Zeit.', intro:'Wer lebte wann? Wähle die Bereiche, die dich interessieren, und entdecke ihre Menschen auf einer gemeinsamen Zeitleiste.',
@@ -33,6 +34,7 @@ export const messages = {
     ready:'Sammlung geladen.', resetFilters:'Alle Kategorien anzeigen', openPerson:'Person ansehen', direct:'Direkter Link', available:'Verfügbare Fassungen',
   },
   en: {
+    openMenu:'Open menu', closeMenu:'Collapse menu', controls:'View & filters', timelineGuide:'Legend & controls', settings:'Settings', personDetails:'Person details',
     title:'Explore lives through time', description:'Explore lives from science, philosophy, art and politics on a shared timeline.',
     atlas:'The atlas', categories:'Categories', timeline:'Timeline', about:'About the atlas', language:'Language', theme:'Switch colour theme', light:'Light', dark:'Dark',
     collection:'A collection of lives', hero:'People and their time.', intro:'Who lived when? Choose the fields that interest you and discover their people on one shared timeline.',

@@ -1,4 +1,5 @@
 const paths = {
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
   science:'<path d="M9 3h6m-5 0v7L4 20h16l-6-10V3M7 15h10"/>',
   mathematics:'<path d="M4 7h6M7 4v6m7-5 6 6m0-6-6 6M4 16h6m4-1h6m-6 4h6"/>',
   physics:'<ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/>',

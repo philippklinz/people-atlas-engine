@@ -10,6 +10,9 @@ const aboutDialog = document.querySelector('#about-dialog');
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 let state, categories = [], people = [], catalog, catalogUrl, timeline, config, queryTimer, rangeTimer;
 let lastGroupedAction = {kind:'', time:0}, missingPerson = false, languageFallback = false;
+const narrowMenu = matchMedia('(max-width: 900px)');
+const narrowPerson = matchMedia('(max-width: 700px)');
+let menuOpen = !narrowMenu.matches, personTrigger = null;
 const t = (key, values) => translate(state?.language ?? 'de',key,values);
 const text = value => escape(localize(value,state.language));
 const filtered = () => selectPeople(people,categories,state.categories,state.query,state.language);
@@ -32,6 +35,7 @@ function footer() {
   return '<footer class="page-footer"><span>' + t('footer') + '</span><button data-action="about">' + t('design') + ' ↗</button></footer>';
 }
 function shell(main) {
+  if (state.view === 'timeline') return workspace(main);
   const overview = stateUrl({...state,view:'categories',person:null});
   const timelineUrl = stateUrl({...state,view:'timeline',person:null});
   return '<div class="mo-shell"><aside class="mo-sidebar"><a class="mo-brand" href="' + escape(overview) + '" data-nav="categories"><span class="brand-symbol">' + icon('timeline') + '</span><span>People Atlas<small>Learning Labs</small></span></a><div class="mo-nav-group"><div class="mo-nav-title">' + t('atlas') + '</div><nav class="mo-nav" aria-label="' + t('atlas') + '"><a href="' + escape(overview) + '" data-nav="categories" ' + (state.view === 'categories' ? 'aria-current="page"' : '') + '>' + icon('grid') + t('categories') + '</a><a href="' + escape(timelineUrl) + '" data-nav="timeline" ' + (state.view === 'timeline' ? 'aria-current="page"' : '') + '>' + icon('timeline') + t('timeline') + '</a><a href="#about" data-action="about">' + icon('info') + t('about') + '</a></nav></div><p class="rail-intro">' + t('description') + '</p><div class="rail-legend"><i></i><span>' + t('legend') + '</span></div><div class="mo-sidebar-foot">STATIC BY DESIGN<br>' + t('noTracking') + '</div></aside><div class="mo-main"><header class="mo-topbar"><div class="mo-topbar-path">LEARNING LABS / <strong>PEOPLE ATLAS</strong></div><div class="mo-topbar-actions">' + languageControl() + button('theme',icon(state.theme === 'dark' ? 'sun' : 'moon'),'mo-btn icon-button','aria-label="' + t('theme') + '" title="' + t('theme') + '"') + '</div></header><main id="main" class="page ' + (state.view === 'timeline' ? 'timeline-page' : '') + '">' + (languageFallback ? '<div class="notice">' + t('sourceFallback') + '</div>' : '') + main + footer() + '</main></div>';
@@ -62,30 +66,57 @@ function categoryEditor() {
 function listView(matches) {
   return '<div class="table-wrap"><table class="people-table"><caption>' + t('listCaption') + '</caption><thead><tr><th scope="col">' + t('name') + '</th><th scope="col">' + t('dates') + '</th><th scope="col">' + t('fields') + '</th></tr></thead><tbody>' + matches.map(p=>'<tr><td><a href="' + escape(personUrl(p.id)) + '" data-person="' + p.id + '">' + avatar(p) + '<span>' + escape(p.name) + '</span></a></td><td class="mo-mono">' + lifespan(p,state.language) + '</td><td>' + p.categories.map(categoryName).join(', ') + '</td></tr>').join('') + '</tbody></table></div>';
 }
-function timelinePage() {
-  const matches = filtered();
-  if (!state.years) state.years=fitYears(matches);
-  const unknown = matches.filter(p=>!interval(p)).length;
-  return '<div class="timeline-heading"><div><span class="mo-eyebrow">' + t('selection') + '</span><h1 tabindex="-1">' + t('timeline') + '</h1></div>' + button('share',icon('external') + '<span class="share-label">' + t('share') + '</span>','mo-btn','aria-label="' + t('share') + '"') + '</div>' +
-    (missingPerson ? '<div class="notice">' + t('invalidPerson') + button('dismiss-person',t('dismiss'),'text-action') + '</div>' : '') +
-    '<div class="timeline-tools"><form id="search-form" class="search-field"><label for="person-search">' + t('search') + '</label><div class="search-wrap">' + icon('search') + '<input id="person-search" name="q" type="search" value="' + escape(state.query) + '" placeholder="' + t('searchPlaceholder') + '" autocomplete="off" maxlength="160"></div></form>' + categoryEditor() + '<div class="view-switch" role="group" aria-label="' + t('timeline') + '">' + button('show-timeline',t('chart'),'mo-btn ' + (state.display === 'timeline' ? 'active' : ''),'aria-pressed="' + (state.display === 'timeline') + '"') + button('show-list',t('list'),'mo-btn ' + (state.display === 'list' ? 'active' : ''),'aria-pressed="' + (state.display === 'list') + '"') + '</div></div><div class="chips">' + state.categories.map(id=>'<span class="chip">' + categoryName(id) + '</span>').join('') + '</div>' +
-    (!matches.length ? '<section class="empty"><h2>' + (state.categories.length ? t('noResults') : t('emptySelection')) + '</h2><p>' + t('noResultsHelp') + '</p>' + (state.query ? button('reset-search',t('resetSearch'),'mo-btn mo-btn-primary') : button('all-open',t('all'),'mo-btn mo-btn-primary')) + '</section>' :
-    state.display === 'list' ? listView(matches) :
-    '<section class="timeline-frame" aria-label="' + t('timeline') + '"><div class="axis-tools"><div class="range-buttons">' + button('pan-left','←','mo-btn','aria-label="' + t('previous') + '"') + button('pan-right','→','mo-btn','aria-label="' + t('next') + '"') + button('zoom-in','+','mo-btn','aria-label="' + t('zoomIn') + '"') + button('zoom-out','−','mo-btn','aria-label="' + t('zoomOut') + '"') + button('fit',t('fit'),'mo-btn') + '</div><select id="period-select" aria-label="' + t('presets') + '"><option value="">' + t('presets') + '</option><option value="all">' + t('whole') + '</option><option value="ancient">' + t('antiquity') + '</option><option value="medieval">' + t('medieval') + '</option><option value="early">' + t('earlyModern') + '</option><option value="modern">' + t('modern') + '</option></select><span id="period-text" class="period-text"></span></div><div id="timeline" class="timeline-canvas" tabindex="0" role="region" aria-label="' + t('timeline') + '" aria-describedby="timeline-help"></div><div class="timeline-meta"><span id="in-view"></span><span>' + t('daysPrecision') + '</span></div></section><div id="range-empty" class="notice" hidden>' + t('outOfRange') + button('fit',t('showAll'),'text-action') + '</div><div class="legend"><span><i></i>' + t('legend') + '</span><span><i class="dashed"></i>' + t('uncertain') + '</span>' + (matches.some(p=>p.status==='living') ? '<span><i class="open"></i>' + t('continuing') + '</span>' : '') + '</div><p class="timeline-help" id="timeline-help">' + t('gesture') + '</p><p class="timeline-help">' + t('noYearZero') + '</p>' +
+function timeControls() {
+  return '<section class="menu-section time-controls" aria-labelledby="time-heading"><h2 id="time-heading">' + t('range') + '</h2><span id="period-text" class="period-text"></span><div class="axis-tools"><div class="range-buttons">' +
+    button('pan-left','←','mo-btn','aria-label="' + t('previous') + '"') + button('pan-right','→','mo-btn','aria-label="' + t('next') + '"') + button('zoom-in','+','mo-btn','aria-label="' + t('zoomIn') + '"') + button('zoom-out','−','mo-btn','aria-label="' + t('zoomOut') + '"') + '</div>' + button('fit',t('fit'),'mo-btn fit-button') +
+    '<select id="period-select" aria-label="' + t('presets') + '"><option value="">' + t('presets') + '</option><option value="all">' + t('whole') + '</option><option value="ancient">' + t('antiquity') + '</option><option value="medieval">' + t('medieval') + '</option><option value="early">' + t('earlyModern') + '</option><option value="modern">' + t('modern') + '</option></select></div>' +
+    '<details class="manual-range"><summary>' + t('range') + '</summary><form id="range-form"><label>' + t('from') + '<input id="range-from" name="from" type="number" min="-10000" max="2200" value="' + state.years[0] + '" required></label><label>' + t('to') + '<input id="range-to" name="to" type="number" min="-10000" max="2200" value="' + state.years[1] + '" required></label><button class="mo-btn" type="submit">' + t('go') + '</button></form><small>' + t('yearHelp') + '</small><p id="range-error" role="alert" class="error-detail"></p></details></section>';
+}
+function workspace(main) {
+  const matches=filtered(), unknown=matches.filter(p=>!interval(p)).length;
+  const overview=stateUrl({...state,view:'categories',person:null});
+  return '<div class="atlas-workspace ' + (menuOpen ? '' : 'menu-closed') + '">' +
+    button('open-menu',icon('menu'),'mo-btn menu-launcher','aria-label="' + t('openMenu') + '" title="' + t('openMenu') + '" aria-controls="workspace-menu" aria-expanded="' + menuOpen + '"') +
+    '<aside id="workspace-menu" class="workspace-menu" data-theme="dark" aria-label="' + t('controls') + '" ' + (menuOpen ? '' : 'inert') + '><div class="workspace-menu-head"><a class="mo-brand" href="' + escape(overview) + '" data-nav="categories"><span class="brand-symbol">' + icon('timeline') + '</span><span>People Atlas<small>Learning Labs</small></span></a>' + button('close-menu',icon('close'),'mo-btn icon-button','aria-label="' + t('closeMenu') + '" title="' + t('closeMenu') + '"') + '</div>' +
+    '<div class="workspace-menu-scroll"><nav class="workspace-nav"><a href="' + escape(overview) + '" data-nav="categories">' + icon('grid') + t('overview') + '</a></nav><div class="workspace-heading"><span class="mo-eyebrow">' + t('selection') + '</span><h1 tabindex="-1">' + t('timeline') + '</h1><span id="in-view" class="menu-status" aria-live="polite"></span></div>' +
+    '<section class="menu-section"><form id="search-form" class="search-field"><label for="person-search">' + t('search') + '</label><div class="search-wrap">' + icon('search') + '<input id="person-search" name="q" type="search" value="' + escape(state.query) + '" placeholder="' + t('searchPlaceholder') + '" autocomplete="off" maxlength="160"></div></form>' + categoryEditor() + '<div class="chips">' + state.categories.map(id=>'<span class="chip">' + categoryName(id) + '</span>').join('') + '</div><div class="view-switch" role="group" aria-label="' + t('timeline') + '">' + button('show-timeline',t('chart'),'mo-btn ' + (state.display === 'timeline' ? 'active' : ''),'aria-pressed="' + (state.display === 'timeline') + '"') + button('show-list',t('list'),'mo-btn ' + (state.display === 'list' ? 'active' : ''),'aria-pressed="' + (state.display === 'list') + '"') + '</div></section>' +
+    (state.display==='timeline' ? timeControls() : '') +
+    '<details class="menu-section timeline-guide"><summary>' + t('timelineGuide') + '</summary><div class="legend"><span><i></i>' + t('legend') + '</span><span><i class="dashed"></i>' + t('uncertain') + '</span>' + (matches.some(p=>p.status==='living') ? '<span><i class="open"></i>' + t('continuing') + '</span>' : '') + '</div><p class="timeline-help" id="timeline-help">' + t('gesture') + '</p><p class="timeline-help">' + t('noYearZero') + '</p><p class="timeline-help">' + t('daysPrecision') + '</p></details>' +
     (unknown ? '<p class="notice">' + t('unknownDates',{count:unknown}) + '</p>' : '') +
-    '<details class="manual-range"><summary>' + t('range') + '</summary><form id="range-form"><label>' + t('from') + '<input id="range-from" name="from" type="number" min="-10000" max="2200" value="' + state.years[0] + '" required></label><label>' + t('to') + '<input id="range-to" name="to" type="number" min="-10000" max="2200" value="' + state.years[1] + '" required></label><button class="mo-btn" type="submit">' + t('go') + '</button></form><small>' + t('yearHelp') + '</small><p id="range-error" role="alert" class="error-detail"></p></details>');
+    '<section class="menu-section workspace-settings" aria-label="' + t('settings') + '"><div class="menu-preferences">' + languageControl() + button('theme',icon(state.theme === 'dark' ? 'sun' : 'moon'),'mo-btn icon-button','aria-label="' + t('theme') + '" title="' + t('theme') + '"') + '</div>' + button('share',icon('external') + t('share'),'mo-btn') + button('about',icon('info') + t('about'),'mo-btn') + '</section><p class="workspace-foot">STATIC BY DESIGN · LEARNING LABS</p></div></aside>' +
+    '<main id="main" class="workspace-stage" tabindex="-1" aria-label="' + t('timeline') + '"><div class="workspace-notices">' + (languageFallback ? '<div class="notice">' + t('sourceFallback') + '</div>' : '') + (missingPerson ? '<div class="notice">' + t('invalidPerson') + button('dismiss-person',t('dismiss'),'text-action') + '</div>' : '') + '</div>' + main + '</main></div>';
+}
+function setMenuOpen(open) {
+  menuOpen=open;
+  const workspace=document.querySelector('.atlas-workspace'),menu=document.querySelector('#workspace-menu'),launcher=document.querySelector('.menu-launcher');
+  if (!workspace) return;
+  workspace.classList.toggle('menu-closed',!open);
+  menu.inert=!open;launcher.setAttribute('aria-expanded',String(open));
+  (open ? menu.querySelector('[data-action="close-menu"]') : launcher).focus({preventScroll:true});
+}
+function timelinePage() {
+  const matches=filtered();
+  if (!state.years) state.years=fitYears(matches);
+  if (!matches.length) return '<section class="empty"><h2>' + (state.categories.length ? t('noResults') : t('emptySelection')) + '</h2><p>' + t('noResultsHelp') + '</p>' + (state.query ? button('reset-search',t('resetSearch'),'mo-btn mo-btn-primary') : button('all-open',t('all'),'mo-btn mo-btn-primary')) + '</section>';
+  if (state.display==='list') return listView(matches);
+  return '<section class="timeline-frame" aria-label="' + t('timeline') + '"><div id="timeline" class="timeline-canvas" tabindex="0" role="region" aria-label="' + t('timeline') + '" aria-describedby="timeline-help"></div></section><div id="range-empty" class="notice range-notice" hidden>' + t('outOfRange') + button('fit',t('showAll'),'text-action') + '</div>';
 }
 function render(focusHeading=false) {
   const active = document.activeElement;
   const focusId=active?.id, position=active?.selectionStart;
   const y=window.scrollY;
+  const menuScroll=document.querySelector('.workspace-menu-scroll')?.scrollTop ?? 0;
+  const openDetails=[...document.querySelectorAll('#workspace-menu details[open]')].map(detail=>detail.className.split(' ')[0]);
   timeline?.destroy(); timeline=null;
   document.documentElement.lang=state.language;
   document.documentElement.dataset.theme=state.theme;
+  document.documentElement.dataset.view=state.view;
   document.title='People Atlas — ' + t('title');
   document.querySelector('meta[name="description"]').content=t('description');
   document.querySelector('.skip-link').textContent=state.language==='de'?'Zum Inhalt':'Skip to content';
   app.innerHTML=shell(state.view === 'categories' ? overviewPage() : timelinePage());
+  for(const name of openDetails) document.querySelector('#workspace-menu details.'+name)?.setAttribute('open','');
+  if(document.querySelector('.workspace-menu-scroll'))document.querySelector('.workspace-menu-scroll').scrollTop=menuScroll;
   if (state.view==='timeline' && state.display==='timeline' && filtered().some(p=>interval(p))) {
     timeline=new PeopleTimeline(document.querySelector('#timeline'),filtered(),state,years=>{
       clearTimeout(rangeTimer);
@@ -93,7 +124,7 @@ function render(focusHeading=false) {
     });
   }
   if (state.view==='timeline') updateRangeLabels();
-  if (focusHeading) { document.querySelector('h1')?.focus({preventScroll:true}); window.scrollTo(0,0); }
+  if (focusHeading) { document.querySelector(state.view==='timeline' && !menuOpen ? '#main' : 'h1')?.focus({preventScroll:true}); window.scrollTo(0,0); }
   else if (focusId) {
     const target=document.getElementById(focusId);
     if (target && !personDialog.open) {
@@ -147,23 +178,37 @@ function avatar(person) {
 function openPerson(id) {
   const person=people.find(p=>p.id===id);
   if (!person) return;
+  if(!personDialog.open)personTrigger=document.activeElement;
   push({person:id,view:'timeline'});
   renderPerson();
 }
 function closePerson() {
   if (!state.person) return;
+  const id=state.person;
   push({person:null});
   renderPerson();
+  const target=personTrigger?.isConnected ? personTrigger : document.querySelector('a[data-person="'+id+'"]') ?? document.querySelector('#timeline, #main');
+  target?.focus({preventScroll:true});
+}
+function syncPersonPanel() {
+  const modal=narrowPerson.matches;
+  if(personDialog.open && personDialog.matches(':modal')!==modal)personDialog.close();
+  personDialog.setAttribute('aria-modal',String(modal));
+  if(!personDialog.open)modal ? personDialog.showModal() : personDialog.show();
 }
 function renderPerson() {
   const person=people.find(p=>p.id===state.person);
   if (!person) { if(personDialog.open) personDialog.close(); return; }
+  const previousPerson=personDialog.dataset.person,scroll=personDialog.scrollTop;
+  const focused=personDialog.contains(document.activeElement)?document.activeElement:null;
+  const focusedAction=focused?.dataset.action;
+  personDialog.dataset.person=person.id;
   const span=interval(person),contemporaries=span ? filtered().filter(other=>{
     const otherSpan=interval(other);
     return other.id!==person.id && otherSpan && span.start<=otherSpan.end && span.end>=otherSpan.start;
   }).slice(0,7) : [];
   const portrait=person.portrait;
-  personDialog.innerHTML='<div class="dialog-toolbar"><span class="mo-eyebrow">People Atlas</span><div class="mo-topbar-actions">' + languageControl() + button('close-person',icon('close'),'mo-btn icon-button','aria-label="' + t('close') + '" autofocus') + '</div></div><article class="dialog-body"><div class="person-hero">' +
+  personDialog.innerHTML='<div class="dialog-toolbar"><span class="mo-eyebrow">' + t('personDetails') + '</span><div class="mo-topbar-actions">' + languageControl() + button('close-person',icon('close'),'mo-btn icon-button','aria-label="' + t('close') + '" autofocus') + '</div></div><article class="dialog-body"><div class="person-hero">' +
     (portrait ? '<img class="portrait" src="' + escape(contentUrl(portrait.path,catalogUrl)) + '" alt="' + text(portrait.alt) + '">' : '<div class="portrait-placeholder"><b aria-hidden="true">' + escape(initials(person)) + '</b><span>' + t('noPortrait') + '</span></div>') +
     '<div class="person-title"><span class="mo-eyebrow">' + person.categories.map(categoryName).join(' · ') + '</span><h2 id="person-name">' + escape(person.name) + '</h2><div class="lifespan">' + lifespan(person,state.language) + '</div><p>' + text(person.summary) + '</p></div></div><section class="dialog-section"><h3>' + t('biography') + '</h3><p>' + text(person.biography) + '</p></section>' +
     (person.dateNote ? '<section class="dialog-section"><h3>' + t('dateNote') + '</h3><p>' + text(person.dateNote) + '</p></section>' : '') +
@@ -172,7 +217,10 @@ function renderPerson() {
     '<section class="dialog-section"><h3>' + t('sources') + '</h3><ul class="source-list">' + person.sources.map(s=>'<li><a href="' + escape(safeUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" lang="en">' + escape(s.title) + icon('external') + '</a></li>').join('') + '</ul><p class="source-hint">' + t('sourceHint') + '</p></section>' +
     (portrait ? '<details class="credits"><summary>' + t('portraitCredit') + '</summary><p>' + escape(portrait.credit) + ' · <a href="' + escape(portrait.source) + '" target="_blank" rel="noopener noreferrer">' + escape(portrait.originalFile ?? t('portraitCredit')) + '</a> · <a href="' + escape(portrait.licenseUrl) + '" target="_blank" rel="noopener noreferrer">' + escape(portrait.license) + '</a></p></details>' : '') +
     '<div class="dialog-actions">' + (span ? button('focus-person',t('focusPerson'),'mo-btn mo-btn-primary') : '') + button('share',t('share'),'mo-btn') + '</div></article>';
-  if (!personDialog.open) personDialog.showModal();
+  syncPersonPanel();
+  personDialog.scrollTop=previousPerson===person.id?scroll:0;
+  if(focusedAction)personDialog.querySelector('[data-action="'+focusedAction+'"]')?.focus({preventScroll:true});
+  else if(focused)personDialog.querySelector('[data-action="close-person"]')?.focus({preventScroll:true});
 }
 function renderAbout() {
   aboutDialog.innerHTML='<div class="dialog-toolbar"><span class="mo-eyebrow">People Atlas</span>' + button('close-about',icon('close'),'mo-btn icon-button','aria-label="' + t('close') + '" autofocus') + '</div><div class="dialog-body"><h2 id="about-title">' + t('aboutTitle') + '</h2>' + ['aboutText','scope','languageCoverage','privacy','licenses'].map(key=>'<p>' + t(key) + '</p>').join('') + '<p class="mo-mono mo-small">' + t('dataUpdated',{date:escape(catalog.updated)}) + '</p><ul class="source-list"><li><a href="https://github.com/philippklinz/people-atlas-engine" target="_blank" rel="noopener noreferrer">' + t('engine') + '</a></li><li><a href="https://github.com/philippklinz/people-atlas-content" target="_blank" rel="noopener noreferrer">' + t('content') + '</a></li><li><a href="https://philippklinz.github.io/modern-objectivity-style/" target="_blank" rel="noopener noreferrer">Modern Objectivity</a></li></ul></div>';
@@ -193,7 +241,8 @@ document.addEventListener('click',event=>{
   if (!control || control.tagName==='SELECT') return;
   const action=control.dataset.action;
   event.preventDefault();
-  if(action==='theme'){push({theme:state.theme==='dark'?'light':'dark'});render();}
+  if(action==='open-menu'||action==='close-menu')setMenuOpen(action==='open-menu');
+  else if(action==='theme'){push({theme:state.theme==='dark'?'light':'dark'});render();}
   else if(action==='about')renderAbout();
   else if(action==='close-about')aboutDialog.close();
   else if(action==='close-person')closePerson();
@@ -245,6 +294,10 @@ document.addEventListener('submit',event=>{
   }
 });
 document.addEventListener('keydown',event=>{
+  if(event.key==='Escape' && !aboutDialog.open){
+    if(personDialog.open && !personDialog.matches(':modal')){event.preventDefault();closePerson();return;}
+    if(menuOpen && narrowMenu.matches && !personDialog.open){event.preventDefault();setMenuOpen(false);return;}
+  }
   if(event.target.id!=='timeline')return;
   const keys={ArrowLeft:'pan-left',ArrowRight:'pan-right','+':'zoom-in','=':'zoom-in','-':'zoom-out'};
   if(keys[event.key]){event.preventDefault();shiftYears(keys[event.key]);}
@@ -254,6 +307,8 @@ personDialog.addEventListener('cancel',event=>{event.preventDefault();closePerso
 personDialog.addEventListener('click',event=>{if(event.target===personDialog){const r=personDialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closePerson();}});
 aboutDialog.addEventListener('click',event=>{if(event.target===aboutDialog){const r=aboutDialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)aboutDialog.close();}});
 window.addEventListener('popstate',()=>{if(!config)return;clearTimeout(queryTimer);clearTimeout(rangeTimer);state=readState(location.href,categories,config.defaultLanguage);render();});
+narrowPerson.addEventListener('change',()=>{if(personDialog.open)syncPersonPanel();});
+narrowMenu.addEventListener('change',event=>{menuOpen=!event.matches;if(state?.view==='timeline')render();});
 
 async function json(url) {
   const response=await fetch(url,{cache:'no-cache',signal:AbortSignal.timeout(20000)});
