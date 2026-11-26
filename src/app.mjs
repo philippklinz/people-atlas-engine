@@ -10,9 +10,8 @@ const aboutDialog = document.querySelector('#about-dialog');
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 let state, categories = [], people = [], catalog, catalogUrl, timeline, config, queryTimer, rangeTimer;
 let lastGroupedAction = {kind:'', time:0}, missingPerson = false, languageFallback = false;
-const narrowMenu = matchMedia('(max-width: 900px)');
 const narrowPerson = matchMedia('(max-width: 700px)');
-let menuOpen = !narrowMenu.matches, personTrigger = null;
+let menuOpen = false, personTrigger = null;
 const t = (key, values) => translate(state?.language ?? 'de',key,values);
 const text = value => escape(localize(value,state.language));
 const filtered = () => selectPeople(people,categories,state.categories,state.query,state.language);
@@ -67,32 +66,51 @@ function listView(matches) {
   return '<div class="table-wrap"><table class="people-table"><caption>' + t('listCaption') + '</caption><thead><tr><th scope="col">' + t('name') + '</th><th scope="col">' + t('dates') + '</th><th scope="col">' + t('fields') + '</th></tr></thead><tbody>' + matches.map(p=>'<tr><td><a href="' + escape(personUrl(p.id)) + '" data-person="' + p.id + '">' + avatar(p) + '<span>' + escape(p.name) + '</span></a></td><td class="mo-mono">' + lifespan(p,state.language) + '</td><td>' + p.categories.map(categoryName).join(', ') + '</td></tr>').join('') + '</tbody></table></div>';
 }
 function timeControls() {
-  return '<section class="menu-section time-controls" aria-labelledby="time-heading"><h2 id="time-heading">' + t('range') + '</h2><span id="period-text" class="period-text"></span><div class="axis-tools"><div class="range-buttons">' +
-    button('pan-left','←','mo-btn','aria-label="' + t('previous') + '"') + button('pan-right','→','mo-btn','aria-label="' + t('next') + '"') + button('zoom-in','+','mo-btn','aria-label="' + t('zoomIn') + '"') + button('zoom-out','−','mo-btn','aria-label="' + t('zoomOut') + '"') + '</div>' + button('fit',t('fit'),'mo-btn fit-button') +
-    '<select id="period-select" aria-label="' + t('presets') + '"><option value="">' + t('presets') + '</option><option value="all">' + t('whole') + '</option><option value="ancient">' + t('antiquity') + '</option><option value="medieval">' + t('medieval') + '</option><option value="early">' + t('earlyModern') + '</option><option value="modern">' + t('modern') + '</option></select></div>' +
-    '<details class="manual-range"><summary>' + t('range') + '</summary><form id="range-form"><label>' + t('from') + '<input id="range-from" name="from" type="number" min="-10000" max="2200" value="' + state.years[0] + '" required></label><label>' + t('to') + '<input id="range-to" name="to" type="number" min="-10000" max="2200" value="' + state.years[1] + '" required></label><button class="mo-btn" type="submit">' + t('go') + '</button></form><small>' + t('yearHelp') + '</small><p id="range-error" role="alert" class="error-detail"></p></details></section>';
+  return '<div class="time-controls" role="group" aria-label="' + t('range') + '"><div class="period-readout"><span>' + t('range') + '</span><output id="period-text" class="period-text"></output></div><div class="axis-tools"><div class="range-buttons">' +
+    button('pan-left','←','mo-btn','aria-label="' + t('previous') + '" title="' + t('previous') + '"') + button('pan-right','→','mo-btn','aria-label="' + t('next') + '" title="' + t('next') + '"') + button('zoom-in','+','mo-btn','aria-label="' + t('zoomIn') + '" title="' + t('zoomIn') + '"') + button('zoom-out','−','mo-btn','aria-label="' + t('zoomOut') + '" title="' + t('zoomOut') + '"') + '</div>' + button('fit',t('fit'),'mo-btn fit-button') + '</div>' +
+    '<select id="period-select" aria-label="' + t('presets') + '"><option value="">' + t('presets') + '</option><option value="all">' + t('whole') + '</option><option value="ancient">' + t('antiquity') + '</option><option value="medieval">' + t('medieval') + '</option><option value="early">' + t('earlyModern') + '</option><option value="modern">' + t('modern') + '</option></select></div>';
+}
+function manualRange() {
+  return '<details class="menu-section manual-range"><summary>' + t('range') + '</summary><form id="range-form"><label>' + t('from') + '<input id="range-from" name="from" type="number" min="-10000" max="2200" value="' + state.years[0] + '" required></label><label>' + t('to') + '<input id="range-to" name="to" type="number" min="-10000" max="2200" value="' + state.years[1] + '" required></label><button class="mo-btn" type="submit">' + t('go') + '</button></form><small>' + t('yearHelp') + '</small><p id="range-error" role="alert" class="error-detail"></p></details>';
+}
+function workspaceHeader() {
+  return '<header id="workspace-header" class="workspace-header"><div class="workspace-identity">' +
+    button('open-menu',icon('menu'),'mo-btn menu-launcher','aria-label="' + t('openMenu') + '" title="' + t('openMenu') + '" aria-controls="workspace-menu" aria-expanded="' + menuOpen + '"') +
+    '<div class="workspace-title"><h1>' + t('timeline') + '</h1><span id="in-view" class="header-status" aria-live="polite"></span></div></div>' +
+    (state.display==='timeline' ? timeControls() : '') + '<div class="workspace-preferences">' + languageControl() +
+    button('theme',icon(state.theme === 'dark' ? 'sun' : 'moon'),'mo-btn icon-button','aria-label="' + t('theme') + '" title="' + t('theme') + '"') +
+    button('share',icon('copy'),'mo-btn icon-button','aria-label="' + t('share') + '" title="' + t('share') + '"') + '</div></header>';
 }
 function workspace(main) {
   const matches=filtered(), unknown=matches.filter(p=>!interval(p)).length;
   const overview=stateUrl({...state,view:'categories',person:null});
-  return '<div class="atlas-workspace ' + (menuOpen ? '' : 'menu-closed') + '">' +
-    button('open-menu',icon('menu'),'mo-btn menu-launcher','aria-label="' + t('openMenu') + '" title="' + t('openMenu') + '" aria-controls="workspace-menu" aria-expanded="' + menuOpen + '"') +
-    '<aside id="workspace-menu" class="workspace-menu" data-theme="dark" aria-label="' + t('controls') + '" ' + (menuOpen ? '' : 'inert') + '><div class="workspace-menu-head"><a class="mo-brand" href="' + escape(overview) + '" data-nav="categories"><span class="brand-symbol">' + icon('timeline') + '</span><span>People Atlas<small>Learning Labs</small></span></a>' + button('close-menu',icon('close'),'mo-btn icon-button','aria-label="' + t('closeMenu') + '" title="' + t('closeMenu') + '"') + '</div>' +
-    '<div class="workspace-menu-scroll"><nav class="workspace-nav"><a href="' + escape(overview) + '" data-nav="categories">' + icon('grid') + t('overview') + '</a></nav><div class="workspace-heading"><span class="mo-eyebrow">' + t('selection') + '</span><h1 tabindex="-1">' + t('timeline') + '</h1><span id="in-view" class="menu-status" aria-live="polite"></span></div>' +
-    '<section class="menu-section"><form id="search-form" class="search-field"><label for="person-search">' + t('search') + '</label><div class="search-wrap">' + icon('search') + '<input id="person-search" name="q" type="search" value="' + escape(state.query) + '" placeholder="' + t('searchPlaceholder') + '" autocomplete="off" maxlength="160"></div></form>' + categoryEditor() + '<div class="chips">' + state.categories.map(id=>'<span class="chip">' + categoryName(id) + '</span>').join('') + '</div><div class="view-switch" role="group" aria-label="' + t('timeline') + '">' + button('show-timeline',t('chart'),'mo-btn ' + (state.display === 'timeline' ? 'active' : ''),'aria-pressed="' + (state.display === 'timeline') + '"') + button('show-list',t('list'),'mo-btn ' + (state.display === 'list' ? 'active' : ''),'aria-pressed="' + (state.display === 'list') + '"') + '</div></section>' +
-    (state.display==='timeline' ? timeControls() : '') +
+  return '<div class="atlas-workspace ' + (menuOpen ? '' : 'menu-closed') + '">' + workspaceHeader() +
+    '<main id="main" class="workspace-stage" tabindex="-1" aria-label="' + t('timeline') + '"><div class="workspace-notices">' + (languageFallback ? '<div class="notice">' + t('sourceFallback') + '</div>' : '') + (missingPerson ? '<div class="notice">' + t('invalidPerson') + button('dismiss-person',t('dismiss'),'text-action') + '</div>' : '') + '</div>' + main + '</main></div>' +
+    button('close-menu','','menu-backdrop','id="menu-backdrop" tabindex="-1" aria-label="' + t('closeMenu') + '" ' + (menuOpen ? '' : 'hidden')) +
+    '<aside id="workspace-menu" class="workspace-menu ' + (menuOpen ? '' : 'is-closed') + '" data-theme="dark" role="dialog" aria-label="' + t('controls') + '" aria-hidden="' + !menuOpen + '" ' + (menuOpen ? 'aria-modal="true"' : 'inert') + '><div class="workspace-menu-head"><a class="mo-brand" href="' + escape(overview) + '" data-nav="categories"><span class="brand-symbol">' + icon('timeline') + '</span><span>People Atlas<small>Learning Labs</small></span></a>' + button('close-menu',icon('close'),'mo-btn icon-button','aria-label="' + t('closeMenu') + '" title="' + t('closeMenu') + '"') + '</div>' +
+    '<div class="workspace-menu-scroll"><nav class="workspace-nav"><a href="' + escape(overview) + '" data-nav="categories">' + icon('grid') + t('overview') + '</a></nav><div class="workspace-heading"><h2>' + t('selection') + '</h2></div>' +
+    '<section class="menu-section"><form id="search-form" class="search-field"><label for="person-search">' + t('search') + '</label><div class="search-wrap">' + icon('search') + '<input id="person-search" name="q" type="search" value="' + escape(state.query) + '" placeholder="' + t('searchPlaceholder') + '" autocomplete="off" maxlength="160"></div>' + (state.query ? button('reset-search',t('resetSearch'),'text-action') : '') + '</form>' + categoryEditor() + '<div class="chips">' + state.categories.map(id=>'<span class="chip">' + categoryName(id) + '</span>').join('') + '</div><div class="view-switch" role="group" aria-label="' + t('timeline') + '">' + button('show-timeline',t('chart'),'mo-btn ' + (state.display === 'timeline' ? 'active' : ''),'aria-pressed="' + (state.display === 'timeline') + '"') + button('show-list',t('list'),'mo-btn ' + (state.display === 'list' ? 'active' : ''),'aria-pressed="' + (state.display === 'list') + '"') + '</div></section>' +
+    (state.display==='timeline' ? manualRange() : '') +
     '<details class="menu-section timeline-guide"><summary>' + t('timelineGuide') + '</summary><div class="legend"><span><i></i>' + t('legend') + '</span><span><i class="dashed"></i>' + t('uncertain') + '</span>' + (matches.some(p=>p.status==='living') ? '<span><i class="open"></i>' + t('continuing') + '</span>' : '') + '</div><p class="timeline-help" id="timeline-help">' + t('gesture') + '</p><p class="timeline-help">' + t('noYearZero') + '</p><p class="timeline-help">' + t('daysPrecision') + '</p></details>' +
     (unknown ? '<p class="notice">' + t('unknownDates',{count:unknown}) + '</p>' : '') +
-    '<section class="menu-section workspace-settings" aria-label="' + t('settings') + '"><div class="menu-preferences">' + languageControl() + button('theme',icon(state.theme === 'dark' ? 'sun' : 'moon'),'mo-btn icon-button','aria-label="' + t('theme') + '" title="' + t('theme') + '"') + '</div>' + button('share',icon('external') + t('share'),'mo-btn') + button('about',icon('info') + t('about'),'mo-btn') + '</section><p class="workspace-foot">STATIC BY DESIGN · LEARNING LABS</p></div></aside>' +
-    '<main id="main" class="workspace-stage" tabindex="-1" aria-label="' + t('timeline') + '"><div class="workspace-notices">' + (languageFallback ? '<div class="notice">' + t('sourceFallback') + '</div>' : '') + (missingPerson ? '<div class="notice">' + t('invalidPerson') + button('dismiss-person',t('dismiss'),'text-action') + '</div>' : '') + '</div>' + main + '</main></div>';
+    '<section class="menu-section workspace-settings">' + button('about',icon('info') + t('about'),'mo-btn') + '</section><p class="workspace-foot">STATIC BY DESIGN · LEARNING LABS</p></div></aside>';
 }
-function setMenuOpen(open) {
-  menuOpen=open;
+function setMenuOpen(open, focus=true) {
   const workspace=document.querySelector('.atlas-workspace'),menu=document.querySelector('#workspace-menu'),launcher=document.querySelector('.menu-launcher');
+  menuOpen=Boolean(open && workspace);
+  personDialog.inert=menuOpen;
+  document.querySelector('.skip-link').inert=menuOpen;
   if (!workspace) return;
-  workspace.classList.toggle('menu-closed',!open);
-  menu.inert=!open;launcher.setAttribute('aria-expanded',String(open));
-  (open ? menu.querySelector('[data-action="close-menu"]') : launcher).focus({preventScroll:true});
+  workspace.classList.toggle('menu-closed',!menuOpen);
+  menu.classList.toggle('is-closed',!menuOpen);
+  menu.inert=!menuOpen;
+  menu.setAttribute('aria-hidden',String(!menuOpen));
+  if(menuOpen)menu.setAttribute('aria-modal','true');else menu.removeAttribute('aria-modal');
+  launcher.setAttribute('aria-expanded',String(menuOpen));
+  document.querySelector('#menu-backdrop').hidden=!menuOpen;
+  document.querySelector('#workspace-header').inert=menuOpen;
+  document.querySelector('#main').inert=menuOpen;
+  if(focus)(menuOpen ? menu.querySelector('[data-action="close-menu"]') : launcher).focus({preventScroll:true});
 }
 function timelinePage() {
   const matches=filtered();
@@ -104,6 +122,8 @@ function timelinePage() {
 function render(focusHeading=false) {
   const active = document.activeElement;
   const focusId=active?.id, position=active?.selectionStart;
+  const focusAction=active?.dataset.action, focusInPerson=personDialog.contains(active);
+  const focusScope=active?.closest('#workspace-header, #workspace-menu')?.id;
   const y=window.scrollY;
   const menuScroll=document.querySelector('.workspace-menu-scroll')?.scrollTop ?? 0;
   const openDetails=[...document.querySelectorAll('#workspace-menu details[open]')].map(detail=>detail.className.split(' ')[0]);
@@ -124,22 +144,24 @@ function render(focusHeading=false) {
     });
   }
   if (state.view==='timeline') updateRangeLabels();
-  if (focusHeading) { document.querySelector(state.view==='timeline' && !menuOpen ? '#main' : 'h1')?.focus({preventScroll:true}); window.scrollTo(0,0); }
-  else if (focusId) {
-    const target=document.getElementById(focusId);
-    if (target && !personDialog.open) {
+  renderPerson();
+  setMenuOpen(menuOpen,false);
+  if (focusHeading) { document.querySelector(state.view==='timeline' ? (menuOpen ? '#workspace-menu [data-action="close-menu"]' : '#main') : 'h1')?.focus({preventScroll:true}); window.scrollTo(0,0); }
+  else if (!focusInPerson && (focusId || focusAction)) {
+    const target=focusId ? document.getElementById(focusId) : document.querySelector((focusScope ? '#'+focusScope+' ' : '')+'[data-action="'+focusAction+'"]');
+    if (target && !target.closest('[inert]')) {
       target.focus({preventScroll:true});
       if (position!=null && target.type==='search') target.setSelectionRange(position,position);
     }
     window.scrollTo(0,y);
   }
-  renderPerson();
+  if(menuOpen && !aboutDialog.open && !document.querySelector('#workspace-menu').contains(document.activeElement))document.querySelector('#workspace-menu [data-action="close-menu"]').focus({preventScroll:true});
   history.replaceState(history.state,'',stateUrl(state));
 }
 function updateRangeLabels() {
   if (!state.years) return;
   const range = document.querySelector('#period-text');
-  if (range) range.textContent=formatYear(state.years[0],state.language) + ' — ' + formatYear(state.years[1],state.language);
+  if (range) range.textContent=range.title=formatYear(state.years[0],state.language) + ' — ' + formatYear(state.years[1],state.language);
   const matches=filtered(), visible=matches.filter(p=>{const span=interval(p);return span && span.start<=state.years[1] && span.end>=state.years[0];}).length;
   const status=document.querySelector('#in-view');
   if (status) status.textContent=t('visible',{visible,total:matches.length});
@@ -192,6 +214,7 @@ function closePerson() {
 }
 function syncPersonPanel() {
   const modal=narrowPerson.matches;
+  if(modal && menuOpen)setMenuOpen(false,false);
   if(personDialog.open && personDialog.matches(':modal')!==modal)personDialog.close();
   personDialog.setAttribute('aria-modal',String(modal));
   if(!personDialog.open)modal ? personDialog.showModal() : personDialog.show();
@@ -228,7 +251,7 @@ function renderAbout() {
 }
 async function copyLink() {
   try {await navigator.clipboard.writeText(stateUrl(state).href);announce(t('copied'));
-    const targets=document.querySelectorAll('[data-action="share"]');targets.forEach(b=>{b.dataset.original=b.innerHTML;b.textContent=t('copied');});
+    const targets=document.querySelectorAll('[data-action="share"]');targets.forEach(b=>{b.dataset.original=b.innerHTML;if(b.classList.contains('icon-button'))b.innerHTML=icon('check');else b.textContent=t('copied');});
     setTimeout(()=>targets.forEach(b=>{if(b.isConnected)b.innerHTML=b.dataset.original;}),1600);
   } catch {announce(t('shareFail'));}
 }
@@ -236,7 +259,7 @@ document.addEventListener('click',event=>{
   const link=event.target.closest('a[data-person],a[data-nav]');
   if (link && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button!==0)) return;
   if (link?.dataset.person) {event.preventDefault();openPerson(link.dataset.person);return;}
-  if (link?.dataset.nav) {event.preventDefault();push({view:link.dataset.nav,person:null});render(true);return;}
+  if (link?.dataset.nav) {event.preventDefault();setMenuOpen(false,false);push({view:link.dataset.nav,person:null});render(true);return;}
   const control=event.target.closest('[data-action]');
   if (!control || control.tagName==='SELECT') return;
   const action=control.dataset.action;
@@ -246,11 +269,11 @@ document.addEventListener('click',event=>{
   else if(action==='about')renderAbout();
   else if(action==='close-about')aboutDialog.close();
   else if(action==='close-person')closePerson();
-  else if(action==='all'||action==='all-open'){push({categories:categories.map(c=>c.id),years:null,...(action==='all-open'?{view:'timeline'}:{})});render();}
+  else if(action==='all'||action==='all-open'){if(action==='all-open')setMenuOpen(false,false);push({categories:categories.map(c=>c.id),years:null,...(action==='all-open'?{view:'timeline'}:{})});render();}
   else if(action==='clear'){push({categories:[],years:null});render();}
-  else if(action==='open'){push({view:'timeline',years:null,person:null});render(true);}
+  else if(action==='open'){setMenuOpen(false,false);push({view:'timeline',years:null,person:null});render(true);}
   else if(action==='editor-all'){document.querySelectorAll('#category-form input').forEach(input=>input.checked=true);}
-  else if(action==='show-list'||action==='show-timeline'){push({display:action==='show-list'?'list':'timeline'});render();}
+  else if(action==='show-list'||action==='show-timeline'){setMenuOpen(false,false);push({display:action==='show-list'?'list':'timeline'});render(true);}
   else if(action==='reset-search'){push({query:'',years:null});render();}
   else if(action==='dismiss-person'){missingPerson=false;push({person:null},null,true);render();}
   else if(action==='fit'){setYears(fitYears(filtered()));}
@@ -286,17 +309,26 @@ document.addEventListener('submit',event=>{
   if(!['search-form','category-form','range-form'].includes(form.id))return;
   event.preventDefault();
   if(form.id==='search-form'){clearTimeout(queryTimer);push({query:new FormData(form).get('q'),years:null},'search');render();}
-  if(form.id==='category-form'){push({categories:new FormData(form).getAll('category'),years:null});render();}
+  if(form.id==='category-form'){push({categories:new FormData(form).getAll('category'),years:null});setMenuOpen(false,false);render(true);}
   if(form.id==='range-form'){
     const data=new FormData(form),from=Number(data.get('from')),to=Number(data.get('to'));
     if(!Number.isInteger(from)||!Number.isInteger(to)||from===0||to===0||from<MIN_YEAR||to>MAX_YEAR||from>=to){document.querySelector('#range-error').textContent=t('invalidRange');return;}
-    document.querySelector('#range-error').textContent='';setYears([from,to]);
+    document.querySelector('#range-error').textContent='';setYears([from,to]);setMenuOpen(false);
   }
 });
 document.addEventListener('keydown',event=>{
+  if(menuOpen && !aboutDialog.open && !personDialog.matches(':modal')){
+    if(event.key==='Escape'){event.preventDefault();setMenuOpen(false);return;}
+    if(event.key==='Tab'){
+      const menu=document.querySelector('#workspace-menu');
+      const items=[...menu.querySelectorAll('a[href], button, input, select, summary, [tabindex="0"]')].filter(el=>!el.disabled && el.getClientRects().length);
+      const first=items[0],last=items.at(-1);
+      if(event.shiftKey && (document.activeElement===first || !menu.contains(document.activeElement))){event.preventDefault();last?.focus();}
+      else if(!event.shiftKey && (document.activeElement===last || !menu.contains(document.activeElement))){event.preventDefault();first?.focus();}
+    }
+  }
   if(event.key==='Escape' && !aboutDialog.open){
     if(personDialog.open && !personDialog.matches(':modal')){event.preventDefault();closePerson();return;}
-    if(menuOpen && narrowMenu.matches && !personDialog.open){event.preventDefault();setMenuOpen(false);return;}
   }
   if(event.target.id!=='timeline')return;
   const keys={ArrowLeft:'pan-left',ArrowRight:'pan-right','+':'zoom-in','=':'zoom-in','-':'zoom-out'};
@@ -306,9 +338,8 @@ document.addEventListener('personselect',event=>openPerson(event.detail));
 personDialog.addEventListener('cancel',event=>{event.preventDefault();closePerson();});
 personDialog.addEventListener('click',event=>{if(event.target===personDialog){const r=personDialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closePerson();}});
 aboutDialog.addEventListener('click',event=>{if(event.target===aboutDialog){const r=aboutDialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)aboutDialog.close();}});
-window.addEventListener('popstate',()=>{if(!config)return;clearTimeout(queryTimer);clearTimeout(rangeTimer);state=readState(location.href,categories,config.defaultLanguage);render();});
+window.addEventListener('popstate',()=>{if(!config)return;clearTimeout(queryTimer);clearTimeout(rangeTimer);setMenuOpen(false,false);state=readState(location.href,categories,config.defaultLanguage);render();});
 narrowPerson.addEventListener('change',()=>{if(personDialog.open)syncPersonPanel();});
-narrowMenu.addEventListener('change',event=>{menuOpen=!event.matches;if(state?.view==='timeline')render();});
 
 async function json(url) {
   const response=await fetch(url,{cache:'no-cache',signal:AbortSignal.timeout(20000)});

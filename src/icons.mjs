@@ -17,6 +17,7 @@ const paths = {
   moon:'<path d="M20 15A9 9 0 0 1 9 4a9 9 0 1 0 11 11Z"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/>',
   check:'<path d="m5 12 4 4L19 6"/>',
+  copy:'<rect x="8" y="8" width="12" height="13" rx="1"/><path d="M16 8V3H3v13h5"/>',
   close:'<path d="m6 6 12 12M6 18 18 6"/>',
   search:'<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',
   external:'<path d="M14 3h7v7m0-7L10 14M10 4H4v16h16v-6"/>'

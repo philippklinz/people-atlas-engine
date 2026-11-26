@@ -7,6 +7,8 @@ export class PeopleTimeline {
     this.container = container;
     this.people = people;
     this.state = state;
+    this.ready = false;
+    this.destroyed = false;
     const {items,groups} = this.data(state.years);
     this.groupIds=groups.map(g=>g.id).join(',');
     this.timeline = new Timeline(container,items,groups,{
@@ -18,6 +20,11 @@ export class PeopleTimeline {
       margin:{item:{horizontal:0,vertical:9},axis:12}, showMajorLabels:false,
       moment:value=>moment.utc(value), tooltip:{followMouse:false,delay:350},
       format:{minorLabels:(date,scale)=>scale === 'year' || moment.utc(date).month() === 0 ? formatYear(yearForDate(Number(date)),state.language) : '',majorLabels:()=>''},
+      onInitialDrawComplete:()=>{
+        if(this.destroyed)return;
+        this.ready=true;
+        if(this.pendingYears){const {years,moveWindow}=this.pendingYears;this.pendingYears=null;this.setYears(years,moveWindow);}
+      },
       groupHeightMode:'auto'
     });
     this.timeline.on('click', event=>{
@@ -51,11 +58,14 @@ export class PeopleTimeline {
   }
   setYears(years, moveWindow=true) {
     this.state={...this.state,years};
+    // Changing the window before vis completes its first draw can cancel the
+    // initial range event and leave its canvas hidden. Apply the latest request once ready.
+    if(!this.ready){this.pendingYears={years,moveWindow};return;}
     const {items,groups}=this.data(years),ids=groups.map(g=>g.id).join(',');
     if(ids!==this.groupIds){
       this.timeline.setItems(items);this.timeline.setGroups(groups);this.groupIds=ids;
     }
     if(moveWindow)this.timeline.setWindow(dateForYear(years[0]),dateForYear(years[1],true),{animation:false});
   }
-  destroy() { this.observer.disconnect(); this.timeline.destroy(); }
+  destroy() { this.destroyed=true;this.observer.disconnect(); this.timeline.destroy(); }
 }
