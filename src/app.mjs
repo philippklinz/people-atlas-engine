@@ -22,7 +22,12 @@ function learningLabsLink() {
   return '<a class="mo-btn learning-labs-link" href="https://philipp-klinz.net/learning-labs/" aria-label="' + t('learningLabs') + '" title="' + t('learningLabs') + '">' + icon('back') + 'Learning Labs</a>';
 }
 function languageControl() {
-  return '<label class="language-control"><span>' + t('language') + '</span><select data-action="language" aria-label="' + t('language') + '"><option value="de" ' + (state.language === 'de' ? 'selected' : '') + '>Deutsch</option><option value="en" ' + (state.language === 'en' ? 'selected' : '') + '>English</option></select></label>';
+  return '<label class="language-control"><span>' + t('language') + '</span><select class="mo-select" data-action="language" aria-label="' + t('language') + '"><option value="de" ' + (state.language === 'de' ? 'selected' : '') + '>Deutsch</option><option value="en" ' + (state.language === 'en' ? 'selected' : '') + '>English</option></select></label>';
+}
+function themeButton() {
+  const dark = state.theme === 'dark';
+  return button('theme', icon(dark ? 'sun' : 'moon'), 'mo-btn icon-button',
+    'aria-label="' + t('theme') + '" title="' + t('theme') + '" aria-pressed="' + dark + '"');
 }
 function push(next,kind=null,replace=false) {
   state = {...state,...next};
@@ -34,13 +39,13 @@ function push(next,kind=null,replace=false) {
 }
 function announce(message) { document.querySelector('#announcement').textContent = message; }
 function footer() {
-  return '<footer class="page-footer"><span>' + t('footer') + '</span><button data-action="about">' + t('design') + ' ↗</button></footer>';
+  return '<footer class="page-footer"><span>' + t('footer') + '</span><button type="button" data-action="about" aria-haspopup="dialog">' + t('design') + '</button></footer>';
 }
 function shell(main) {
   if (state.view === 'timeline') return workspace(main);
   const overview = stateUrl({...state,view:'categories',person:null});
-  const timelineUrl = stateUrl({...state,view:'timeline',person:null});
-  return '<div class="mo-shell"><aside class="mo-sidebar"><a class="mo-brand" href="' + escape(overview) + '" data-nav="categories"><span class="brand-symbol">' + icon('timeline') + '</span><span>People Atlas<small>Learning Labs</small></span></a><div class="mo-nav-group"><div class="mo-nav-title">' + t('atlas') + '</div><nav class="mo-nav" aria-label="' + t('atlas') + '"><a href="' + escape(overview) + '" data-nav="categories" ' + (state.view === 'categories' ? 'aria-current="page"' : '') + '>' + icon('grid') + t('categories') + '</a><a href="' + escape(timelineUrl) + '" data-nav="timeline" ' + (state.view === 'timeline' ? 'aria-current="page"' : '') + '>' + icon('timeline') + t('timeline') + '</a><a href="#about" data-action="about">' + icon('info') + t('about') + '</a></nav></div><p class="rail-intro">' + t('description') + '</p><div class="rail-legend"><i></i><span>' + t('legend') + '</span></div><div class="mo-sidebar-foot">STATIC BY DESIGN<br>' + t('noTracking') + '</div></aside><div class="mo-main"><header class="mo-topbar"><div class="mo-topbar-path">' + learningLabsLink() + '</div><div class="mo-topbar-actions">' + languageControl() + button('theme',icon(state.theme === 'dark' ? 'sun' : 'moon'),'mo-btn icon-button','aria-label="' + t('theme') + '" title="' + t('theme') + '"') + '</div></header><main id="main" class="page ' + (state.view === 'timeline' ? 'timeline-page' : '') + '">' + (languageFallback ? '<div class="notice">' + t('sourceFallback') + '</div>' : '') + main + footer() + '</main></div>';
+  const timelineUrl = stateUrl({...state,view:'timeline',display:'timeline',person:null});
+  return '<div class="mo-shell"><aside class="mo-sidebar" data-theme="dark"><a class="mo-brand" href="' + escape(overview) + '" data-nav="categories"><span class="brand-symbol">' + icon('timeline') + '</span><span>People Atlas<small>Learning Labs</small></span></a><div class="mo-nav-group"><div class="mo-nav-title">' + t('atlas') + '</div><nav class="mo-nav" aria-label="' + t('atlas') + '"><a href="' + escape(overview) + '" data-nav="categories" ' + (state.view === 'categories' ? 'aria-current="page"' : '') + '>' + icon('grid') + t('categories') + '</a><a href="' + escape(timelineUrl) + '" data-nav="timeline" ' + (state.view === 'timeline' ? 'aria-current="page"' : '') + '>' + icon('timeline') + t('timeline') + '</a><button type="button" data-action="about" aria-haspopup="dialog">' + icon('info') + t('about') + '</button></nav></div><p class="rail-intro">' + t('description') + '</p><div class="rail-legend"><i></i><span>' + t('legend') + '</span></div><div class="mo-sidebar-foot">STATIC BY DESIGN<br>' + t('noTracking') + '</div></aside><div class="mo-main"><header class="mo-topbar"><div class="mo-topbar-path">' + learningLabsLink() + '</div><div class="mo-topbar-actions">' + languageControl() + themeButton() + '</div></header><main id="main" class="page" tabindex="-1">' + (languageFallback ? '<div class="notice">' + t('sourceFallback') + '</div>' : '') + main + footer() + '</main></div>';
 }
 function preview() {
   const featured = (catalog.featured ?? []).map(id=>people.find(p=>p.id===id)).filter(p=>p && interval(p)).slice(0,4);
@@ -59,44 +64,44 @@ function overviewPage() {
     const count = selectPeople(people,categories,[c.id]).length;
     const chosen = state.categories.includes(c.id);
     const inherited = expanded.has(c.id) && !chosen;
-    return '<label class="category-card" for="category-' + c.id + '"><div class="category-top"><span class="category-icon">' + icon(c.icon) + '</span><input type="checkbox" id="category-' + c.id + '" data-category="' + c.id + '" ' + (chosen ? 'checked' : '') + ' aria-describedby="description-' + c.id + '"></div><div><h3>' + text(c.name) + '</h3><p id="description-' + c.id + '">' + text(c.description) + '</p></div><div class="category-footer"><span class="count">' + t('personCount',{count}) + '</span>' + (inherited ? '<span class="inherited">' + t('inherited') + '</span>' : c.parent ? '<span class="inherited">' + t('included',{parent:categoryName(c.parent)}) + '</span>' : '') + '</div></label>';
+    return '<label class="category-card" for="category-' + c.id + '"><div class="category-top mo-check"><span class="category-icon">' + icon(c.icon) + '</span><input type="checkbox" id="category-' + c.id + '" data-category="' + c.id + '" ' + (chosen ? 'checked' : '') + ' aria-labelledby="name-' + c.id + '" aria-describedby="description-' + c.id + ' category-meta-' + c.id + '"></div><div><h3 id="name-' + c.id + '">' + text(c.name) + '</h3><p id="description-' + c.id + '">' + text(c.description) + '</p></div><div class="category-footer" id="category-meta-' + c.id + '"><span class="count">' + t('personCount',{count}) + '</span>' + (inherited ? '<span class="inherited">' + t('inherited') + '</span>' : c.parent ? '<span class="inherited">' + t('included',{parent:categoryName(c.parent)}) + '</span>' : '') + '</div></label>';
   }).join('') + '</div></section><div class="selection-tray"><div><strong>' + t('selected',{count:state.categories.length}) + '</strong><p>' + (state.categories.length ? t('selectedPeople',{count:selected.length}) : t('emptySelection')) + '</p></div>' + button('open',t('open') + icon('arrow'),'mo-btn mo-btn-primary',state.categories.length ? '' : 'disabled') + '</div><p class="selection-note">' + t('selectHint') + '</p>';
 }
 function categoryEditor() {
-  return '<details class="category-editor"><summary class="mo-btn">' + t('editCategories') + ' (' + state.categories.length + ')</summary><form class="category-popover" id="category-form">' + categories.map(c=>'<label class="' + (c.parent ? 'child' : '') + '"><input type="checkbox" name="category" value="' + c.id + '" ' + (state.categories.includes(c.id) ? 'checked' : '') + '>' + text(c.name) + '</label>').join('') + '<div class="actions">' + button('editor-all',t('all'),'text-action') + '<button class="mo-btn mo-btn-primary" type="submit">' + t('apply') + '</button></div></form></details>';
+  return '<details class="category-editor"><summary class="mo-btn">' + t('editCategories') + ' (' + state.categories.length + ')</summary><form class="category-popover" id="category-form">' + categories.map(c=>'<label class="mo-check' + (c.parent ? ' child' : '') + '"><input type="checkbox" name="category" value="' + c.id + '" ' + (state.categories.includes(c.id) ? 'checked' : '') + '>' + text(c.name) + '</label>').join('') + '<div class="actions">' + button('editor-all',t('all'),'text-action') + '<button class="mo-btn mo-btn-primary" type="submit">' + t('apply') + '</button></div></form></details>';
 }
 function listView(matches) {
-  return '<div class="table-wrap"><table class="people-table"><caption>' + t('listCaption') + '</caption><thead><tr><th scope="col">' + t('name') + '</th><th scope="col">' + t('dates') + '</th><th scope="col">' + t('fields') + '</th></tr></thead><tbody>' + matches.map(p=>'<tr><td><a href="' + escape(personUrl(p.id)) + '" data-person="' + p.id + '">' + avatar(p) + '<span>' + escape(p.name) + '</span></a></td><td class="mo-mono">' + lifespan(p,state.language) + '</td><td>' + p.categories.map(categoryName).join(', ') + '</td></tr>').join('') + '</tbody></table></div>';
+  return '<div class="table-wrap" role="region" aria-labelledby="workspace-title" tabindex="0"><table class="people-table"><caption>' + t('listCaption') + '</caption><thead><tr><th scope="col">' + t('name') + '</th><th scope="col">' + t('dates') + '</th><th scope="col">' + t('fields') + '</th></tr></thead><tbody>' + matches.map(p=>'<tr><td><a href="' + escape(personUrl(p.id)) + '" data-person="' + p.id + '">' + avatar(p) + '<span>' + escape(p.name) + '</span></a></td><td class="mo-mono">' + lifespan(p,state.language) + '</td><td>' + p.categories.map(categoryName).join(', ') + '</td></tr>').join('') + '</tbody></table></div>';
 }
 function timeControls() {
   return '<div class="time-controls" role="group" aria-label="' + t('range') + '"><div class="period-readout"><span>' + t('range') + '</span><output id="period-text" class="period-text"></output></div><div class="axis-tools"><div class="range-buttons">' +
     button('pan-left','←','mo-btn','aria-label="' + t('previous') + '" title="' + t('previous') + '"') + button('pan-right','→','mo-btn','aria-label="' + t('next') + '" title="' + t('next') + '"') + button('zoom-in','+','mo-btn','aria-label="' + t('zoomIn') + '" title="' + t('zoomIn') + '"') + button('zoom-out','−','mo-btn','aria-label="' + t('zoomOut') + '" title="' + t('zoomOut') + '"') + '</div>' + button('fit',t('fit'),'mo-btn fit-button') + '</div>' +
-    '<select id="period-select" aria-label="' + t('presets') + '"><option value="">' + t('presets') + '</option><option value="all">' + t('whole') + '</option><option value="ancient">' + t('antiquity') + '</option><option value="medieval">' + t('medieval') + '</option><option value="early">' + t('earlyModern') + '</option><option value="modern">' + t('modern') + '</option></select></div>';
+    '<select id="period-select" class="mo-select" aria-label="' + t('presets') + '"><option value="">' + t('presets') + '</option><option value="all">' + t('whole') + '</option><option value="ancient">' + t('antiquity') + '</option><option value="medieval">' + t('medieval') + '</option><option value="early">' + t('earlyModern') + '</option><option value="modern">' + t('modern') + '</option></select></div>';
 }
 function manualRange() {
-  return '<details class="menu-section manual-range"><summary>' + t('range') + '</summary><form id="range-form"><label>' + t('from') + '<input id="range-from" name="from" type="number" min="-10000" max="2200" value="' + state.years[0] + '" required></label><label>' + t('to') + '<input id="range-to" name="to" type="number" min="-10000" max="2200" value="' + state.years[1] + '" required></label><button class="mo-btn" type="submit">' + t('go') + '</button></form><small>' + t('yearHelp') + '</small><p id="range-error" role="alert" class="error-detail"></p></details>';
+  return '<details class="menu-section manual-range"><summary>' + t('range') + '</summary><form id="range-form"><label>' + t('from') + '<input class="mo-input" aria-describedby="range-help range-error" id="range-from" name="from" type="number" min="-10000" max="2200" value="' + state.years[0] + '" required></label><label>' + t('to') + '<input class="mo-input" aria-describedby="range-help range-error" id="range-to" name="to" type="number" min="-10000" max="2200" value="' + state.years[1] + '" required></label><button class="mo-btn" type="submit">' + t('go') + '</button></form><small id="range-help">' + t('yearHelp') + '</small><p id="range-error" role="alert" class="error-detail"></p></details>';
 }
-function workspaceHeader() {
+function workspaceHeader(matches) {
   return '<header id="workspace-header" class="workspace-header"><div class="workspace-identity">' +
     button('open-menu',icon('menu'),'mo-btn menu-launcher','aria-label="' + t('openMenu') + '" title="' + t('openMenu') + '" aria-controls="workspace-menu" aria-expanded="' + menuOpen + '"') +
-    '<div class="workspace-title"><h1>' + t('timeline') + '</h1><span id="in-view" class="header-status" aria-live="polite"></span></div></div>' +
-    (state.display==='timeline' && filtered().some(person=>interval(person)) ? timeControls() : '') + '<div class="workspace-preferences">' + languageControl() +
-    button('theme',icon(state.theme === 'dark' ? 'sun' : 'moon'),'mo-btn icon-button','aria-label="' + t('theme') + '" title="' + t('theme') + '"') +
+    '<div class="workspace-title"><h1 id="workspace-title">' + t(state.display === 'list' ? 'peopleList' : 'timeline') + '</h1><span id="in-view" class="header-status" aria-live="polite"></span></div></div>' +
+    (state.display==='timeline' && matches.some(person=>interval(person)) ? timeControls() : '') + '<div class="workspace-preferences">' + languageControl() +
+    themeButton() +
     button('share',icon('copy'),'mo-btn icon-button','aria-label="' + t('share') + '" title="' + t('share') + '"') + '</div></header>';
 }
 function workspace(main) {
   const matches=filtered(), unknown=matches.filter(p=>!interval(p)).length;
   const overview=stateUrl({...state,view:'categories',person:null});
-  return '<div class="atlas-workspace ' + (menuOpen ? '' : 'menu-closed') + '">' + workspaceHeader() +
-    '<main id="main" class="workspace-stage" tabindex="-1" aria-label="' + t('timeline') + '"><div class="workspace-notices">' + (languageFallback ? '<div class="notice">' + t('sourceFallback') + '</div>' : '') + (missingPerson ? '<div class="notice">' + t('invalidPerson') + button('dismiss-person',t('dismiss'),'text-action') + '</div>' : '') + '</div>' + main + '</main></div>' +
+  return '<div class="atlas-workspace ' + (menuOpen ? '' : 'menu-closed') + '">' + workspaceHeader(matches) +
+    '<main id="main" class="workspace-stage" tabindex="-1" aria-labelledby="workspace-title"><div class="workspace-notices">' + (languageFallback ? '<div class="notice">' + t('sourceFallback') + '</div>' : '') + (missingPerson ? '<div class="notice">' + t('invalidPerson') + button('dismiss-person',t('dismiss'),'text-action') + '</div>' : '') + '</div>' + main + '</main></div>' +
     button('close-menu','','menu-backdrop','id="menu-backdrop" tabindex="-1" aria-label="' + t('closeMenu') + '" ' + (menuOpen ? '' : 'hidden')) +
-    '<aside id="workspace-menu" class="workspace-menu ' + (menuOpen ? '' : 'is-closed') + '" data-theme="dark" role="dialog" aria-label="' + t('controls') + '" aria-hidden="' + !menuOpen + '" ' + (menuOpen ? 'aria-modal="true"' : 'inert') + '><div class="workspace-menu-head"><a class="mo-brand" href="' + escape(overview) + '" data-nav="categories"><span class="brand-symbol">' + icon('timeline') + '</span><span>People Atlas<small>Learning Labs</small></span></a>' + button('close-menu',icon('close'),'mo-btn icon-button','aria-label="' + t('closeMenu') + '" title="' + t('closeMenu') + '"') + '</div>' +
-    '<div class="workspace-menu-scroll"><nav class="workspace-nav"><a href="' + escape(overview) + '" data-nav="categories">' + icon('grid') + t('overview') + '</a>' + learningLabsLink() + '</nav><div class="workspace-heading"><h2>' + t('selection') + '</h2></div>' +
-    '<section class="menu-section"><form id="search-form" class="search-field"><label for="person-search">' + t('search') + '</label><div class="search-wrap">' + icon('search') + '<input id="person-search" name="q" type="search" value="' + escape(state.query) + '" placeholder="' + t('searchPlaceholder') + '" autocomplete="off" maxlength="160"></div>' + (state.query ? button('reset-search',t('resetSearch'),'text-action') : '') + '</form>' + categoryEditor() + '<div class="chips">' + state.categories.map(id=>'<span class="chip">' + categoryName(id) + '</span>').join('') + '</div><div class="view-switch" role="group" aria-label="' + t('timeline') + '">' + button('show-timeline',t('chart'),'mo-btn ' + (state.display === 'timeline' ? 'active' : ''),'aria-pressed="' + (state.display === 'timeline') + '"') + button('show-list',t('list'),'mo-btn ' + (state.display === 'list' ? 'active' : ''),'aria-pressed="' + (state.display === 'list') + '"') + '</div></section>' +
+    '<div id="workspace-menu" class="workspace-menu ' + (menuOpen ? '' : 'is-closed') + '" data-theme="dark" role="dialog" aria-label="' + t('controls') + '" aria-hidden="' + !menuOpen + '" ' + (menuOpen ? 'aria-modal="true"' : 'inert') + '><div class="workspace-menu-head"><a class="mo-brand" href="' + escape(overview) + '" data-nav="categories"><span class="brand-symbol">' + icon('timeline') + '</span><span>People Atlas<small>Learning Labs</small></span></a>' + button('close-menu',icon('close'),'mo-btn icon-button','aria-label="' + t('closeMenu') + '" title="' + t('closeMenu') + '"') + '</div>' +
+    '<div class="workspace-menu-scroll"><nav class="workspace-nav" aria-label="' + t('atlas') + '"><a class="mo-btn" href="' + escape(overview) + '" data-nav="categories">' + icon('grid') + t('overview') + '</a>' + learningLabsLink() + '</nav><div class="workspace-heading"><h2>' + t('selection') + '</h2></div>' +
+    '<section class="menu-section"><form id="search-form" class="search-field"><label for="person-search">' + t('search') + '</label><div class="search-wrap">' + icon('search') + '<input class="mo-input" id="person-search" name="q" type="search" value="' + escape(state.query) + '" placeholder="' + t('searchPlaceholder') + '" autocomplete="off" maxlength="160"></div>' + (state.query ? button('reset-search',t('resetSearch'),'text-action') : '') + '</form>' + categoryEditor() + '<div class="chips">' + state.categories.map(id=>'<span class="chip">' + categoryName(id) + '</span>').join('') + '</div><div class="view-switch" role="group" aria-label="' + t('viewMode') + '">' + button('show-timeline',t('chart'),'mo-btn ' + (state.display === 'timeline' ? 'active' : ''),'aria-pressed="' + (state.display === 'timeline') + '"') + button('show-list',t('list'),'mo-btn ' + (state.display === 'list' ? 'active' : ''),'aria-pressed="' + (state.display === 'list') + '"') + '</div></section>' +
     (state.display==='timeline' && matches.some(person=>interval(person)) ? manualRange() : '') +
     '<details class="menu-section timeline-guide"><summary>' + t('timelineGuide') + '</summary><div class="legend"><span><i></i>' + t('legend') + '</span><span><i class="dashed"></i>' + t('uncertain') + '</span>' + (matches.some(p=>p.status==='living') ? '<span><i class="open"></i>' + t('continuing') + '</span>' : '') + '</div><p class="timeline-help" id="timeline-help">' + t('gesture') + '</p><p class="timeline-help">' + t('noYearZero') + '</p><p class="timeline-help">' + t('daysPrecision') + '</p></details>' +
     (unknown ? '<p class="notice">' + t('unknownDates',{count:unknown}) + '</p>' : '') +
-    '<section class="menu-section workspace-settings">' + button('about',icon('info') + t('about'),'mo-btn') + '</section><p class="workspace-foot">STATIC BY DESIGN · LEARNING LABS</p></div></aside>';
+    '<section class="menu-section workspace-settings">' + button('about',icon('info') + t('about'),'mo-btn') + '</section><p class="workspace-foot">STATIC BY DESIGN · LEARNING LABS</p></div></div>';
 }
 function setMenuOpen(open, focus=true) {
   const workspace=document.querySelector('.atlas-workspace'),menu=document.querySelector('#workspace-menu'),launcher=document.querySelector('.menu-launcher');
@@ -121,7 +126,7 @@ function timelinePage() {
   if (!matches.length) return '<section class="empty"><h2>' + (state.categories.length ? t('noResults') : t('emptySelection')) + '</h2><p>' + t('noResultsHelp') + '</p>' + (state.query ? button('reset-search',t('resetSearch'),'mo-btn mo-btn-primary') : button('all-open',t('all'),'mo-btn mo-btn-primary')) + '</section>';
   if (state.display==='list') return listView(matches);
   if (!matches.some(person=>interval(person))) return '<section class="empty"><h2>' + t('unknownDates',{count:matches.length}) + '</h2>' + button('show-list',t('list'),'mo-btn mo-btn-primary') + '</section>';
-  return '<section class="timeline-frame" aria-label="' + t('timeline') + '"><div id="timeline" class="timeline-canvas" tabindex="0" role="region" aria-label="' + t('timeline') + '" aria-describedby="timeline-help"></div></section><div id="range-empty" class="notice range-notice" hidden>' + t('outOfRange') + button('fit',t('showAll'),'text-action') + '</div>';
+  return '<div class="timeline-frame"><div id="timeline" class="timeline-canvas" tabindex="0" role="region" aria-label="' + t('timeline') + '" aria-describedby="timeline-help"></div></div><div id="range-empty" class="notice range-notice" hidden>' + t('outOfRange') + button('fit',t('showAll'),'text-action') + '</div>';
 }
 function render(focusHeading=false) {
   const active = document.activeElement;
@@ -135,7 +140,8 @@ function render(focusHeading=false) {
   document.documentElement.lang=state.language;
   document.documentElement.dataset.theme=state.theme;
   document.documentElement.dataset.view=state.view;
-  document.title='People Atlas — ' + t('title');
+  const pageTitle = state.view === 'categories' ? 'title' : state.display === 'list' ? 'peopleList' : 'timeline';
+  document.title = 'People Atlas — ' + t(pageTitle);
   document.querySelector('meta[name="description"]').content=t('description');
   document.querySelector('.skip-link').textContent=state.language==='de'?'Zum Inhalt':'Skip to content';
   app.innerHTML=shell(state.view === 'categories' ? overviewPage() : timelinePage());
@@ -168,7 +174,9 @@ function updateRangeLabels() {
   if (range) range.textContent=range.title=formatYear(state.years[0],state.language) + ' — ' + formatYear(state.years[1],state.language);
   const matches=filtered(), visible=matches.filter(p=>{const span=interval(p);return span && span.start<=state.years[1] && span.end>=state.years[0];}).length;
   const status=document.querySelector('#in-view');
-  if (status) status.textContent=t('visible',{visible,total:matches.length});
+  if (status) status.textContent = state.display === 'list'
+    ? t('personCount', {count:matches.length})
+    : t('visible', {visible,total:matches.length});
   const empty=document.querySelector('#range-empty');
   if (empty) empty.hidden=visible>0;
   if (document.querySelector('#range-from')) document.querySelector('#range-from').value=state.years[0];
@@ -263,7 +271,7 @@ document.addEventListener('click',event=>{
   const link=event.target.closest('a[data-person],a[data-nav]');
   if (link && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button!==0)) return;
   if (link?.dataset.person) {event.preventDefault();openPerson(link.dataset.person);return;}
-  if (link?.dataset.nav) {event.preventDefault();setMenuOpen(false,false);push({view:link.dataset.nav,person:null});render(true);return;}
+  if (link?.dataset.nav) {event.preventDefault();setMenuOpen(false,false);push({view:link.dataset.nav,display:link.dataset.nav==='timeline' ? 'timeline' : state.display,person:null});render(true);return;}
   const control=event.target.closest('[data-action]');
   if (!control || control.tagName==='SELECT') return;
   const action=control.dataset.action;
@@ -275,7 +283,7 @@ document.addEventListener('click',event=>{
   else if(action==='close-person')closePerson();
   else if(action==='all'||action==='all-open'){if(action==='all-open')setMenuOpen(false,false);push({categories:categories.map(c=>c.id),years:null,...(action==='all-open'?{view:'timeline'}:{})});render();}
   else if(action==='clear'){push({categories:[],years:null});render();}
-  else if(action==='open'){setMenuOpen(false,false);push({view:'timeline',years:null,person:null});render(true);}
+  else if(action==='open'){setMenuOpen(false,false);push({view:'timeline',display:'timeline',years:null,person:null});render(true);}
   else if(action==='editor-all'){document.querySelectorAll('#category-form input').forEach(input=>input.checked=true);}
   else if(action==='show-list'||action==='show-timeline'){setMenuOpen(false,false);push({display:action==='show-list'?'list':'timeline'});render(true);}
   else if(action==='reset-search'){push({query:'',years:null});render();}

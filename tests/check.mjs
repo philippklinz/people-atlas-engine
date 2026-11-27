@@ -12,9 +12,17 @@ const results=runTests();
 for(const result of results)console.log((result.ok?'PASS ':'FAIL ')+result.name+(result.error?': '+result.error:''));
 if(results.some(x=>!x.ok))process.exitCode=1;
 const manifest=json(path.join(root,'vendor/manifest.json'));
-for(const file of manifest.files){
-  const data=fs.readFileSync(path.join(root,file.path));
-  if(data.length!==file.bytes||createHash('sha256').update(data).digest('hex')!==file.sha256)throw new Error('Vendor checksum mismatch: '+file.path);
+function verifyFile(relativePath, {bytes, sha256}) {
+  const data = fs.readFileSync(path.join(root, relativePath));
+  if (data.length !== bytes || createHash('sha256').update(data).digest('hex') !== sha256) {
+    throw new Error('Vendor checksum mismatch: ' + relativePath);
+  }
+}
+for (const file of manifest.files) verifyFile(file.path, file);
+const fontDir = 'styles/fonts/liberation';
+const fonts = json(path.join(root, fontDir, 'PROVENANCE.json'));
+for (const [name, file] of Object.entries(fonts.files)) {
+  verifyFile(path.join(fontDir, name), file);
 }
 const status=json(path.join(root,'i18n-status.json'));
 const hash=createHash('sha256').update(JSON.stringify(messages.en)).digest('hex');
