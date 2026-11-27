@@ -11,6 +11,7 @@ const paths = {
   art:'<path d="M12 3a9 9 0 1 0 0 18c2 0 3-1 2-3s1-3 3-3h2c5-4 0-12-7-12Z"/><circle cx="7" cy="10" r="1"/><circle cx="10" cy="6" r="1"/><circle cx="16" cy="7" r="1"/>',
   literature:'<path d="M12 5v16M2 4c4-1 7 0 10 2 3-2 6-3 10-2v15c-4-1-7 0-10 2-3-2-6-3-10-2V4Z"/>',
   arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',
+  back:'<path d="M20 12H4m6-6-6 6 6 6"/>',
   grid:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
   timeline:'<path d="M3 6h14M7 12h14M3 18h11M6 3v6m9 0v6m-5 0v6"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-11v2"/>',

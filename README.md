@@ -4,6 +4,8 @@ Explore lives through time. A static, openly accessible Learning Lab for compari
 
 Select categories on the overview, then open their shared timeline. A person appears once even when several selected categories include them. Search, zoom, period presets, a readable list, source-backed biographies and URL navigation are included.
 
+The overview header and timeline menu include a button back to the [Learning Labs directory](https://philipp-klinz.net/learning-labs/).
+
 A compact header holds the menu button, time controls, language, theme and link copying. The timeline fills the remaining viewport. Search, categories and explanatory notes sit in a left overlay with a dimmed, clickable backdrop; opening or closing it never shifts or resizes the timeline. The menu starts closed and closes when a category selection is applied. Person details slide in from the right at 40% of desktop width; narrow screens use a full-width person panel.
 
 ## Repositories

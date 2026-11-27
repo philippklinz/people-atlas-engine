@@ -213,6 +213,7 @@ html[data-view="timeline"],html[data-view="timeline"] body{height:100%;overflow:
 .workspace-menu-head .icon-button{min-width:32px;min-height:32px;padding:6px;background:transparent;border-color:transparent}
 .workspace-menu-head .icon-button:hover{background:var(--mo-surface-2);border-color:var(--mo-border)}
 .workspace-menu-scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:20px}
+.workspace-nav{display:grid;gap:12px}
 .workspace-nav a{display:flex;align-items:center;gap:8px;color:var(--mo-muted);font-size:12px;text-decoration:none}
 .workspace-nav a:hover{color:var(--mo-accent)}
 .workspace-nav .icon{width:16px;height:16px}
