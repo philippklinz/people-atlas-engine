@@ -7,6 +7,19 @@ const catalogue=JSON.parse(fs.readFileSync(path.join(content,'catalog.json')));
 const contentCategories=JSON.parse(fs.readFileSync(path.join(content,catalogue.categories)));
 const records=catalogue.collections.flatMap(file=>JSON.parse(fs.readFileSync(path.join(content,file))));
 const output=path.join(engine,'qa');
+// Expected UI totals come from the evolving catalogue, never a fixed demo count.
+const belongsTo=(person,category)=>person.categories.some(id=>{
+  while(id){if(id===category)return true;id=contentCategories.find(c=>c.id===id)?.parent;}
+  return false;
+});
+const span=person=>{
+  const first=person.birth.year??person.birth.earliest;
+  const last=person.status==='living'?new Date().getUTCFullYear():person.death?.year??person.death?.latest;
+  return first==null||last==null?null:[first,last];
+};
+const plottable=people=>people.filter(person=>span(person));
+const scientists=records.filter(person=>belongsTo(person,'scientists'));
+const earlyScientists=scientists.filter(person=>{const years=span(person);return years&&years[0]<=1800&&years[1]>=1500;});
 const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'application/json',css:'text/css',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',ttf:'font/ttf'};
 (async()=>{
   const server=http.createServer((req,res)=>{
@@ -48,12 +61,12 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     await page.locator('#category-women-in-science').check();
     await page.locator('[data-action="open"]').click();
     await page.waitForSelector('.person-label');
-    assert.equal(await page.locator('.person-label').count(),women.length);
+    assert.equal(await page.locator('.person-label').count(),plottable(women).length);
     await menuClosed();
     await openMenu();
     await page.locator('#person-search').fill('Mathematikerinnen');
     await page.waitForTimeout(300);
-    assert.deepEqual((await page.locator('.person-label').evaluateAll(links=>links.map(link=>link.dataset.person))).sort(),womenInMath.map(p=>p.id).sort());
+    assert.deepEqual((await page.locator('.person-label').evaluateAll(links=>links.map(link=>link.dataset.person))).sort(),plottable(womenInMath).map(p=>p.id).sort());
     await page.locator('#person-search').fill('');await page.waitForTimeout(300);
     await page.waitForSelector('.vis-item.vis-range:visible');
     await closeMenu();
@@ -64,10 +77,10 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     await page.locator('#category-form button[type="submit"]').click();
     await menuClosed();
     const combined=records.filter(p=>p.categories.includes('women-in-science')||p.categories.includes('mathematicians'));
-    assert.equal(await page.locator('.person-label').count(),combined.length);
+    assert.equal(await page.locator('.person-label').count(),plottable(combined).length);
     assert.equal(await page.locator('.person-label[data-person="ada-lovelace"]').count(),1);
     await page.goto(base+'/app/?lang=en&categories=women-in-science&view=timeline');await ready();
-    assert.equal(await page.locator('.person-label').count(),women.length,'English direct links preserve the category');
+    assert.equal(await page.locator('.person-label').count(),plottable(women).length,'English direct links preserve the category');
     assert(await page.locator('.chips').textContent().then(text=>text.includes('Women in science and research')));
     await page.goto(base+'/app/');await ready();
     await page.locator('#category-scientists').check();
@@ -121,14 +134,14 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     await page.waitForFunction(()=>document.querySelector('#announcement').textContent.includes('kopiert'));
     assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),page.url());
     assert.deepEqual(await page.locator('#workspace-header').boundingBox(),headerBeforeCopy,'Copy feedback does not resize the header');
-    assert.equal(await page.locator('.person-label').count(),19,'Overlapping parent and child selections must be a union');
+    assert.equal(await page.locator('.person-label').count(),plottable(scientists).length,'Overlapping parent and child selections must be a union');
     assert.equal(await page.locator('.person-label[data-person="rene-descartes"]').count(),1);
     const ticks=await page.locator('.vis-time-axis .vis-text.vis-minor:visible').allTextContents();
     assert(ticks.length<40,'Overview must not draw one tick per year');
     assert(!ticks.some(t=>t.trim()==='0'),'There must be no year-zero tick');
     await page.locator('#period-select').selectOption('early');
     assert.equal(url().searchParams.get('from'),'1500');
-    assert.equal(await page.locator('.person-label').count(),5,'Only people alive in the selected period occupy timeline rows');
+    assert.equal(await page.locator('.person-label').count(),earlyScientists.length,'Only people alive in the selected period occupy timeline rows');
     await page.waitForTimeout(300);
     await screenshot('timeline-desktop');
     const rangeBefore=url().searchParams.get('from');
@@ -164,12 +177,14 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     assert.equal(url().searchParams.get('person'),'rene-descartes');
     assert.equal(await page.locator('html').getAttribute('lang'),'en');
     assert.equal(url().searchParams.get('from'),rangeBefore,'Language switch preserves time');
-    await page.locator('#person-dialog [data-person="isaac-newton"]').click();
-    assert.equal(url().searchParams.get('person'),'isaac-newton');
+    const contemporary=page.locator('#person-dialog .contemporaries a').first();
+    const contemporaryId=await contemporary.getAttribute('data-person');
+    await contemporary.click();
+    assert.equal(url().searchParams.get('person'),contemporaryId);
     await page.keyboard.press('Escape');await page.waitForSelector('#person-dialog[open]',{state:'hidden'});
     assert.equal(url().searchParams.has('person'),false,'Close ends a sequence of person views');
     await openMenu();
-    await page.locator('#person-search').fill('curie');
+    await page.locator('#person-search').fill('Skłodowska');
     await page.waitForTimeout(300);
     assert.equal(await page.locator('.person-label').count(),1);
     assert.match(await page.locator('.person-label').textContent(),/Curie/);
@@ -178,7 +193,7 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     assert.equal(await page.locator('.empty h2').textContent(),'No people found.');
     await page.locator('#workspace-menu [data-action="reset-search"]').click();
     await page.locator('[data-action="show-list"]').click();
-    assert.equal(await page.locator('tbody tr').count(),19);
+    assert.equal(await page.locator('tbody tr').count(),scientists.length);
     await menuClosed();
     await page.locator('[data-action="theme"]').click();
     await screenshot('list-dark');
@@ -227,6 +242,31 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     assert.equal(await page.locator('html').getAttribute('lang'),'de');
     assert.match(await page.locator('.notice').textContent(),/noch nicht verfügbar/);
     await screenshot('overview-mobile');await noOverflow();
+    // The entire expanded collection must remain usable, including undated lives in the list.
+    await page.setViewportSize({width:1440,height:1000});
+    await page.goto(base+'/app/');await ready();
+    await page.locator('[data-action="all"]').click();
+    await page.locator('[data-action="open"]').click();
+    await page.waitForSelector('.person-label:visible');
+    assert.equal(await page.locator('.person-label').count(),plottable(records).length);
+    await openMenu();
+    await page.locator('[data-action="show-list"]').click();
+    const allIds=await page.locator('tbody a[data-person]').evaluateAll(links=>links.map(link=>link.dataset.person));
+    assert.equal(allIds.length,records.length,'All catalogue entries are available in the list');
+    assert.equal(new Set(allIds).size,records.length,'Combining every category never duplicates a person');
+    for(const person of records.filter(p=>!span(p)))assert(allIds.includes(person.id),'Unknown dates must not hide '+person.id);
+    await screenshot('expanded-collection-list');
+    const undated=records.find(person=>person.id==='laozi'&&!span(person))??records.find(person=>!span(person));
+    if(undated){
+      const params=new URLSearchParams({view:'timeline',lang:'en',categories:undated.categories.join(','),q:undated.name});
+      await page.goto(base+'/app/?'+params);await ready();
+      assert.equal(await page.locator('#timeline').count(),0,'An entirely undated selection has an explanatory state, not a blank canvas');
+      assert.equal(await page.locator('#period-select, #range-form').count(),0,'Unknown life dates do not show an arbitrary default period');
+      assert.match(await page.locator('#main .empty').textContent(),/without a plottable lifespan/);
+      await page.locator('#main [data-action="show-list"]').click();
+      assert.equal(await page.locator('tbody a[data-person="'+undated.id+'"]').count(),1,'The undated person is still accessible');
+    }
+
     await page.goto(base+'/app/tests/');await page.waitForSelector('html[data-tests="passed"]');
     assert.deepEqual(errors,[]);
     assert(requests.every(request=>new URL(request).origin===base),'Only the configured local sources may be loaded');

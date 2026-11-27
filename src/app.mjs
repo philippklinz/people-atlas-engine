@@ -77,7 +77,7 @@ function workspaceHeader() {
   return '<header id="workspace-header" class="workspace-header"><div class="workspace-identity">' +
     button('open-menu',icon('menu'),'mo-btn menu-launcher','aria-label="' + t('openMenu') + '" title="' + t('openMenu') + '" aria-controls="workspace-menu" aria-expanded="' + menuOpen + '"') +
     '<div class="workspace-title"><h1>' + t('timeline') + '</h1><span id="in-view" class="header-status" aria-live="polite"></span></div></div>' +
-    (state.display==='timeline' ? timeControls() : '') + '<div class="workspace-preferences">' + languageControl() +
+    (state.display==='timeline' && filtered().some(person=>interval(person)) ? timeControls() : '') + '<div class="workspace-preferences">' + languageControl() +
     button('theme',icon(state.theme === 'dark' ? 'sun' : 'moon'),'mo-btn icon-button','aria-label="' + t('theme') + '" title="' + t('theme') + '"') +
     button('share',icon('copy'),'mo-btn icon-button','aria-label="' + t('share') + '" title="' + t('share') + '"') + '</div></header>';
 }
@@ -90,7 +90,7 @@ function workspace(main) {
     '<aside id="workspace-menu" class="workspace-menu ' + (menuOpen ? '' : 'is-closed') + '" data-theme="dark" role="dialog" aria-label="' + t('controls') + '" aria-hidden="' + !menuOpen + '" ' + (menuOpen ? 'aria-modal="true"' : 'inert') + '><div class="workspace-menu-head"><a class="mo-brand" href="' + escape(overview) + '" data-nav="categories"><span class="brand-symbol">' + icon('timeline') + '</span><span>People Atlas<small>Learning Labs</small></span></a>' + button('close-menu',icon('close'),'mo-btn icon-button','aria-label="' + t('closeMenu') + '" title="' + t('closeMenu') + '"') + '</div>' +
     '<div class="workspace-menu-scroll"><nav class="workspace-nav"><a href="' + escape(overview) + '" data-nav="categories">' + icon('grid') + t('overview') + '</a></nav><div class="workspace-heading"><h2>' + t('selection') + '</h2></div>' +
     '<section class="menu-section"><form id="search-form" class="search-field"><label for="person-search">' + t('search') + '</label><div class="search-wrap">' + icon('search') + '<input id="person-search" name="q" type="search" value="' + escape(state.query) + '" placeholder="' + t('searchPlaceholder') + '" autocomplete="off" maxlength="160"></div>' + (state.query ? button('reset-search',t('resetSearch'),'text-action') : '') + '</form>' + categoryEditor() + '<div class="chips">' + state.categories.map(id=>'<span class="chip">' + categoryName(id) + '</span>').join('') + '</div><div class="view-switch" role="group" aria-label="' + t('timeline') + '">' + button('show-timeline',t('chart'),'mo-btn ' + (state.display === 'timeline' ? 'active' : ''),'aria-pressed="' + (state.display === 'timeline') + '"') + button('show-list',t('list'),'mo-btn ' + (state.display === 'list' ? 'active' : ''),'aria-pressed="' + (state.display === 'list') + '"') + '</div></section>' +
-    (state.display==='timeline' ? manualRange() : '') +
+    (state.display==='timeline' && matches.some(person=>interval(person)) ? manualRange() : '') +
     '<details class="menu-section timeline-guide"><summary>' + t('timelineGuide') + '</summary><div class="legend"><span><i></i>' + t('legend') + '</span><span><i class="dashed"></i>' + t('uncertain') + '</span>' + (matches.some(p=>p.status==='living') ? '<span><i class="open"></i>' + t('continuing') + '</span>' : '') + '</div><p class="timeline-help" id="timeline-help">' + t('gesture') + '</p><p class="timeline-help">' + t('noYearZero') + '</p><p class="timeline-help">' + t('daysPrecision') + '</p></details>' +
     (unknown ? '<p class="notice">' + t('unknownDates',{count:unknown}) + '</p>' : '') +
     '<section class="menu-section workspace-settings">' + button('about',icon('info') + t('about'),'mo-btn') + '</section><p class="workspace-foot">STATIC BY DESIGN · LEARNING LABS</p></div></aside>';
@@ -117,6 +117,7 @@ function timelinePage() {
   if (!state.years) state.years=fitYears(matches);
   if (!matches.length) return '<section class="empty"><h2>' + (state.categories.length ? t('noResults') : t('emptySelection')) + '</h2><p>' + t('noResultsHelp') + '</p>' + (state.query ? button('reset-search',t('resetSearch'),'mo-btn mo-btn-primary') : button('all-open',t('all'),'mo-btn mo-btn-primary')) + '</section>';
   if (state.display==='list') return listView(matches);
+  if (!matches.some(person=>interval(person))) return '<section class="empty"><h2>' + t('unknownDates',{count:matches.length}) + '</h2>' + button('show-list',t('list'),'mo-btn mo-btn-primary') + '</section>';
   return '<section class="timeline-frame" aria-label="' + t('timeline') + '"><div id="timeline" class="timeline-canvas" tabindex="0" role="region" aria-label="' + t('timeline') + '" aria-describedby="timeline-help"></div></section><div id="range-empty" class="notice range-notice" hidden>' + t('outOfRange') + button('fit',t('showAll'),'text-action') + '</div>';
 }
 function render(focusHeading=false) {

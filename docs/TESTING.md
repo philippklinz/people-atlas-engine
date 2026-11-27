@@ -23,6 +23,8 @@ Optional environment variables:
 - BROWSER_EXECUTABLE: an existing Chromium executable.
 - ATLAS_CONTENT_DIR: an alternate content checkout (default: sibling people-atlas-content).
 
+Expected people totals are derived from the configured catalogue, including parent/child category unions and people with unknown life dates. The full collection is also checked in timeline and list modes, without assuming the size of the original demonstration dataset.
+
 The runner starts its own local server and routes the configuration only inside its isolated browser. It leaves atlas.config.json untouched. Screenshots are written to ignored qa/. It verifies category overlap, dates, time controls, search, list mode, person links, browser history, local portraits, language and theme preservation, keyboard operation, narrow layouts, unsupported-language fallback and failed-load recovery.
 
 Workspace checks cover the compact responsive header, automatic menu collapse, backdrop dismissal, Escape priority, focus containment and restoration, inactive background controls, the full viewport without page scrolling, unchanged canvas and plot geometry when the left menu opens or closes, preservation of the time window, the 40% right-hand person panel, timeline interaction while that panel is open, and the switch between non-modal desktop and modal narrow-screen details.

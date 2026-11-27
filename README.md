@@ -24,7 +24,7 @@ Edit atlas.config.json to choose another content catalogue. The default reads th
 
 ## Current scope
 
-- 28 initial people and 11 overlapping categories in the companion content repository, including women in science and research (explicitly including mathematicians).
+- A growing collection of people in 11 overlapping categories in the companion content repository, including women in science and research (explicitly including mathematicians). Counts are read from the catalogue rather than fixed in the engine.
 - Complete German and English journeys, with local UI messages and translated content. The remaining 22 official EU languages are planned under MO-13; see [language coverage](docs/LANGUAGES.md).
 - Year-level dates, BCE/CE without year zero, approximate and bounded dates, living/unknown status.
 - Unknown endpoints remain available in the list; the engine does not fabricate a lifespan bar.
