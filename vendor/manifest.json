@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "upstreamAtlasCommit": "40fe8a3105fecb87f3311f5943c590069eaf1b82",
-  "upstreamStyleCommit": "4301cfc75e7732550bc9d078cee5edeae49ce8d6",
+  "upstreamStyleCommit": "18a78bc5509bf8407600e87c19b5825fbc6cbf63",
   "packages": [
     {
       "name": "@egjs/hammerjs",
@@ -136,29 +136,24 @@
       "sha256": "52cd32a7dff8d46eb56113b6540d1ce023377771ab2a56f250661d21414aa7da"
     },
     {
-      "path": "fonts/LiberationMono-Regular.ttf",
-      "bytes": 319624,
-      "sha256": "5883330d94debd992952cd8f0571b225f478c2d797d3f36c7521b0a5c9bde0f2"
-    },
-    {
-      "path": "fonts/LiberationSans-Bold.ttf",
-      "bytes": 414568,
-      "sha256": "1b5f2da6f4cadce4c05b9ecebe3a6fcd374eb95ae443605e799f4c3287978939"
-    },
-    {
-      "path": "fonts/LiberationSans-Regular.ttf",
-      "bytes": 410820,
-      "sha256": "bade59d822652f76e6941aa87b40a87c13d1cc70db98ededb5011127efafd1d3"
-    },
-    {
-      "path": "fonts/LiberationSerif-Regular.ttf",
-      "bytes": 393692,
-      "sha256": "9caef765d2e891c10dd73658894f01e660fe0c1c83e0bda7d6edf561d8f623d4"
-    },
-    {
       "path": "styles/modern-objectivity.css",
-      "bytes": 18831,
-      "sha256": "d0a3f55ec43b69caa85acdc9be21464bcc3cdf859277392f2b203b01b1f1add5"
+      "bytes": 23067,
+      "sha256": "e366aae50412cf072e813cf29e3a1ae206f3d0dca4447c0e6230af27b9a24862"
+    },
+    {
+      "path": "styles/fonts/liberation/PROVENANCE.json",
+      "bytes": 14341,
+      "sha256": "aa7cfbfcc68383ba8f242822274d188b7c87c7407602f983529334a3901c848b"
+    },
+    {
+      "path": "styles/fonts/liberation/LICENSE-Sans-Narrow.txt",
+      "bytes": 4012,
+      "sha256": "c40dd6adebad817defd68c7edad151d9c13d2ac3b4e1790ce2b727b024438b6d"
+    },
+    {
+      "path": "styles/fonts/liberation/COPYING-Sans-Narrow",
+      "bytes": 17987,
+      "sha256": "ab15fd526bd8dd18a9e77ebc139656bf4d33e97fc7238cd11bf60e2b9b8666c6"
     }
   ]
 }

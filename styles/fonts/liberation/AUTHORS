@@ -1,0 +1,52 @@
+AUTHORS of Liberation fonts (Sans, Serif, Mono):
+https://github.com/liberationfonts/liberation-fonts/blob/main/AUTHORS
+
+Contributors:
+  
+  - Vishal Vijayraghavan  <vishalvvr at fedoraproject dot org>
+      Current Project Owner/ Maintainer of liberationfonts/liberation-fonts
+      Red Hat, Inc.
+
+  - Pravin Satpute  <psatpute at redhat dot com>
+      Project Owner/ Maintainer 
+      Red Hat, Inc.
+      
+  - Steve Matteson
+      Original Designer
+      Ascender, Inc.
+
+---
+
+AUTHORS of Liberation Sans Narrow
+https://github.com/liberationfonts/liberation-sans-narrow/blob/main/AUTHORS
+
+Contributors:
+
+  - Herbert Duerr <duerr at sun.com>
+      Narrow Fonts Contributor
+      Oracle, Inc.
+
+  - Pravin Satpute  <psatpute at redhat dot com>
+      Current Project Owner of liberationfonts/liberation-sans-narrow
+      Red Hat, Inc.
+
+  - Caius 'kaio' Chance <caius.chance at gmail.com>
+      Project Owner (2010)
+      Red Hat, Inc.
+
+  - Denis Jacquerye <moyogo at gmail.com>
+      Project Contributor
+
+  - Mark Webbink <mwebbink AT redhat.com>
+      Release coordinator, Red Hat Inc.
+
+  - Steve Matteson
+      Original Designer (support period expired)
+      Ascender, Inc.
+
+---
+
+AUTHORS of Liberation Fonts Web
+
+  - Philipp Klinz <mail at philipp-klinz.net>
+      Web optimization, subsetting, and WOFF2 conversion, current project owner

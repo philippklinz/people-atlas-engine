@@ -1,0 +1,360 @@
+{
+  "repository": "https://github.com/philippklinz/LiberationFontsWeb",
+  "commit": "991e89ba225875d100b5bc4048626e8b6ac93927",
+  "fontFilesUnmodified": true,
+  "fontBytes": 1464228,
+  "files": {
+    "AUTHORS": {
+      "bytes": 1336,
+      "sha256": "f561c79613c699ce272adb9478d995af82317f99c5ec6294a86a80c539c90ad0"
+    },
+    "LICENSE": {
+      "bytes": 4414,
+      "sha256": "93fed46019c38bbe566b479d22148e2e8a1e85ada614accb0211c37b2c61c19b"
+    },
+    "LiberationFontsWeb.css": {
+      "bytes": 159,
+      "sha256": "818a2a277fa591723fe98524c8e6e8c2ac27da84560c9c792b803df3dc8cbb8c"
+    },
+    "LiberationMonoWeb-Bold.cyrillic.woff2": {
+      "bytes": 24620,
+      "sha256": "b9f0288550d3aabd6cc2222609717cbde937292ba21aec2a7227130a443cd682"
+    },
+    "LiberationMonoWeb-Bold.greek.woff2": {
+      "bytes": 15736,
+      "sha256": "73c1c31ddd52cc3d99b92292aa9d260f3500b4650f4bc08085753f30a76aa866"
+    },
+    "LiberationMonoWeb-Bold.latin-ext.woff2": {
+      "bytes": 29408,
+      "sha256": "a7628663d421840c982d07986a79d0dcba31f8598a55b29fd426792339e1f0f3"
+    },
+    "LiberationMonoWeb-Bold.latin.woff2": {
+      "bytes": 16500,
+      "sha256": "1f1291caa0985b5d2431fc0be81dc309e615369fdc22da8e4a3c3907a8f98f19"
+    },
+    "LiberationMonoWeb-Bold.math.woff2": {
+      "bytes": 6248,
+      "sha256": "223013faa14c39b8938e9cd3b5a542b171f885406bffe9e11b000644b1ad6180"
+    },
+    "LiberationMonoWeb-BoldItalic.cyrillic.woff2": {
+      "bytes": 22784,
+      "sha256": "5a35c7a47facdaced6a3c353ca5769c2b0e39f559db6461dfc8613bbd623e961"
+    },
+    "LiberationMonoWeb-BoldItalic.greek.woff2": {
+      "bytes": 15000,
+      "sha256": "07a5531dfeca213927fa4dd9731102c6abaf20631eff15eba35b9d784cf5d4b8"
+    },
+    "LiberationMonoWeb-BoldItalic.latin-ext.woff2": {
+      "bytes": 27360,
+      "sha256": "b2c152ad18593581e52cfead9b3b545a9d2988a99526a197a5c82a61880165b7"
+    },
+    "LiberationMonoWeb-BoldItalic.latin.woff2": {
+      "bytes": 15320,
+      "sha256": "8394e9f1263591757d3aedb028f4b028900954b0283ffa9344400a1bf2c2a9f6"
+    },
+    "LiberationMonoWeb-BoldItalic.math.woff2": {
+      "bytes": 5612,
+      "sha256": "aa4636d58ae9d9aa16af9c828b1a8105ab48f03afa054455d807eb6db32430e7"
+    },
+    "LiberationMonoWeb-Italic.cyrillic.woff2": {
+      "bytes": 22492,
+      "sha256": "1ec264293cdc8d7fbbd9f3d46c8b6e193cb67d46ddbbfb829f6a954625e9c803"
+    },
+    "LiberationMonoWeb-Italic.greek.woff2": {
+      "bytes": 15404,
+      "sha256": "fa66d3472ac0bf7ae651a77aac0c117d7f17f83bb55b80e5364259092a69b5ab"
+    },
+    "LiberationMonoWeb-Italic.latin-ext.woff2": {
+      "bytes": 26872,
+      "sha256": "36b116f232d0598d1913dfaac9d19fc48c3966f89386c283d2ea1d996f1d3a68"
+    },
+    "LiberationMonoWeb-Italic.latin.woff2": {
+      "bytes": 15200,
+      "sha256": "48cd216cd67598926590c3ef5a8d3199dd71e6e4e2a1d91ff5bf9ed26054cc55"
+    },
+    "LiberationMonoWeb-Italic.math.woff2": {
+      "bytes": 5976,
+      "sha256": "53b6eec335d5d5df6a0c0303cea2581fd2216d5f744fbb47c75aeada7b80555b"
+    },
+    "LiberationMonoWeb-Regular.cyrillic.woff2": {
+      "bytes": 24660,
+      "sha256": "59458104ca6a99e2b999ce39bbe99e811fbcd7a0319214d0efdb8d63077ea619"
+    },
+    "LiberationMonoWeb-Regular.greek.woff2": {
+      "bytes": 16624,
+      "sha256": "71285d1bc2c518422b1c8f9a769ee9f08f04ab6044808c8e7e0957a94318d40f"
+    },
+    "LiberationMonoWeb-Regular.latin-ext.woff2": {
+      "bytes": 30532,
+      "sha256": "b1c7d5e303ace48f2e290b62d254c5b65725f27815909d39194409f0c9172638"
+    },
+    "LiberationMonoWeb-Regular.latin.woff2": {
+      "bytes": 16472,
+      "sha256": "60a79cb47086e081559f8d5e8608021748f6f07127ddaa14cd85c46db5bd5086"
+    },
+    "LiberationMonoWeb-Regular.math.woff2": {
+      "bytes": 6076,
+      "sha256": "a0f334f9c38629554773424fe8e2f1ae3aae3530d9b4b69ea427c143733a22d7"
+    },
+    "LiberationMonoWeb.css": {
+      "bytes": 4271,
+      "sha256": "473a17c7617c915fbf28274dc0cf1b4e904e4c4cc2c1dc8c1ada5e5e50ad9ab8"
+    },
+    "LiberationSansNarrowWeb-Bold.cyrillic.woff2": {
+      "bytes": 11720,
+      "sha256": "4df7b5716841878550d7d822442aadeedf4307946592bdffdf1dba6607054aa9"
+    },
+    "LiberationSansNarrowWeb-Bold.greek.woff2": {
+      "bytes": 8672,
+      "sha256": "8285e9406504af002938c6844d37368ba7b3614f4a6f5dfd9a1f6c616a762f61"
+    },
+    "LiberationSansNarrowWeb-Bold.latin-ext.woff2": {
+      "bytes": 10624,
+      "sha256": "010c3d942895c0376856d6ca735fe40c1b5e129985d4533662335cb72a2336e5"
+    },
+    "LiberationSansNarrowWeb-Bold.latin.woff2": {
+      "bytes": 18376,
+      "sha256": "911fbf60cd9174def85db24f12cbb1b12db0a9b530834ee0dc21d2a5918de8f7"
+    },
+    "LiberationSansNarrowWeb-Bold.math.woff2": {
+      "bytes": 4456,
+      "sha256": "d209dbd5ead0cfaae437a086efe355470ba8c9966b0b547dce74b518499be44f"
+    },
+    "LiberationSansNarrowWeb-BoldItalic.cyrillic.woff2": {
+      "bytes": 16100,
+      "sha256": "24742c3f484809bb3727d4993863721348a28241e6909769ecadf0ff468de5b6"
+    },
+    "LiberationSansNarrowWeb-BoldItalic.greek.woff2": {
+      "bytes": 10280,
+      "sha256": "2037f52f863b281d5016b66c52f5b00a1492fd2121d8a274c63bda9406dd5e2f"
+    },
+    "LiberationSansNarrowWeb-BoldItalic.latin-ext.woff2": {
+      "bytes": 12592,
+      "sha256": "2a2f849e2aea740db4e97026c3346a1256ddca24245d3a57ba37a650a571e7b3"
+    },
+    "LiberationSansNarrowWeb-BoldItalic.latin.woff2": {
+      "bytes": 21380,
+      "sha256": "14ce8320b64625c7c5fed1578e1a79a99dcb13fa59b7be429619d3bdae700409"
+    },
+    "LiberationSansNarrowWeb-BoldItalic.math.woff2": {
+      "bytes": 4732,
+      "sha256": "b5e4fe5fc14d83b7f86be6c6049e24b166629bded7d5dce414d19c335dbd0c7e"
+    },
+    "LiberationSansNarrowWeb-Italic.cyrillic.woff2": {
+      "bytes": 16040,
+      "sha256": "e5ed8c087a67711a3101c73696ace519217758dec69a9b5bd7208ff2ae30b338"
+    },
+    "LiberationSansNarrowWeb-Italic.greek.woff2": {
+      "bytes": 10432,
+      "sha256": "9844313f56df0e7535de13174fcbcc55200c100a874f462091fdfe7039e5defc"
+    },
+    "LiberationSansNarrowWeb-Italic.latin-ext.woff2": {
+      "bytes": 13204,
+      "sha256": "11ad8eac2a04837546673a9262fe74c76d6c2fd76adba81cb9cc542eb429adbc"
+    },
+    "LiberationSansNarrowWeb-Italic.latin.woff2": {
+      "bytes": 22164,
+      "sha256": "eece657cd6875da73d86e5b3b47a9124e5d059f59980a1ef8a0109ef8615247f"
+    },
+    "LiberationSansNarrowWeb-Italic.math.woff2": {
+      "bytes": 4528,
+      "sha256": "19d206f3488a2b445b024d0e8ecde48dac640871b5e770eb3c8e980a83591023"
+    },
+    "LiberationSansNarrowWeb-Regular.cyrillic.woff2": {
+      "bytes": 11864,
+      "sha256": "caa9a4e52348ed450e9beae1d06d0d17674154384b9b1f721635f4f01772f734"
+    },
+    "LiberationSansNarrowWeb-Regular.greek.woff2": {
+      "bytes": 9036,
+      "sha256": "cb78495f7d1dd88e09cec792cc7a70209b6abb4394c4157acea2ff621dd27df9"
+    },
+    "LiberationSansNarrowWeb-Regular.latin-ext.woff2": {
+      "bytes": 11108,
+      "sha256": "f45cd13016644e385e881f4681ec8728dd031afdbe63fc9062dffcdb1dc037bd"
+    },
+    "LiberationSansNarrowWeb-Regular.latin.woff2": {
+      "bytes": 18800,
+      "sha256": "8826010fb616f714f2c5ad6ec7aadb22c6fbd1fb7d174c5c1bf40ce1fa6a71e8"
+    },
+    "LiberationSansNarrowWeb-Regular.math.woff2": {
+      "bytes": 4344,
+      "sha256": "38175981bd8323e8a85dca8588a293bfa363eca690ed5d9966d6c1b32ca6f477"
+    },
+    "LiberationSansNarrowWeb.css": {
+      "bytes": 4531,
+      "sha256": "ce4e70d2db4b8b9e10e5f25e4b6f5d26cc8728e19a751d133026a36e26607e33"
+    },
+    "LiberationSansWeb-Bold.cyrillic.woff2": {
+      "bytes": 28484,
+      "sha256": "b40293de17f3f2fc4ded71b287d27065cb5bbeff6d0663570b46f52a6dea5cd6"
+    },
+    "LiberationSansWeb-Bold.greek.woff2": {
+      "bytes": 20444,
+      "sha256": "f765033981f6ed1e82c086f96f1623d6c3d810271d7b94715196de60b057ef62"
+    },
+    "LiberationSansWeb-Bold.latin-ext.woff2": {
+      "bytes": 31740,
+      "sha256": "15271e7cd426aa2f99a590bffb1a65e21b660b875a40eb9e9d22a8a80276f449"
+    },
+    "LiberationSansWeb-Bold.latin.woff2": {
+      "bytes": 19272,
+      "sha256": "5842523ef30143aae4da34d174674aee354b7b43c061a6a7fb61e4daac20e47d"
+    },
+    "LiberationSansWeb-Bold.math.woff2": {
+      "bytes": 5932,
+      "sha256": "e73b136db7b692ca3fecfb54b7be87b8ebbe5e5c222e00881ddebce37991ceb0"
+    },
+    "LiberationSansWeb-BoldItalic.cyrillic.woff2": {
+      "bytes": 27756,
+      "sha256": "7f39340ee7ed859e38c52553d08c5b84a559706b1baf5614166d64cb43acd4a0"
+    },
+    "LiberationSansWeb-BoldItalic.greek.woff2": {
+      "bytes": 19328,
+      "sha256": "09c275f659c11675b38d6996fcf0473b397037d8213a26b0cb6b5239e1aa5f85"
+    },
+    "LiberationSansWeb-BoldItalic.latin-ext.woff2": {
+      "bytes": 31924,
+      "sha256": "755035226813dbc1179d5eec732dd8e4fca5b723d6b74e5070fda037bb212179"
+    },
+    "LiberationSansWeb-BoldItalic.latin.woff2": {
+      "bytes": 19260,
+      "sha256": "69a1a054445b3d2f7593bb668bcb4f035bb51bb42738836e726c72c062126864"
+    },
+    "LiberationSansWeb-BoldItalic.math.woff2": {
+      "bytes": 6068,
+      "sha256": "e4a9ff9561ae714b8c664fb84ef0464055783a3edee4264bb35b1e378061267b"
+    },
+    "LiberationSansWeb-Italic.cyrillic.woff2": {
+      "bytes": 28236,
+      "sha256": "034671b33a820165f848077ed411415152eccd1f902f3b3419c262c98c008597"
+    },
+    "LiberationSansWeb-Italic.greek.woff2": {
+      "bytes": 18752,
+      "sha256": "5f8a9409dc19345063ce7291828ec6f69354c73c88080191b98d507d5d272516"
+    },
+    "LiberationSansWeb-Italic.latin-ext.woff2": {
+      "bytes": 32888,
+      "sha256": "6a9fcc7b753ca4ef16864d4bf1e2afbd096d2a05f5bf515dd026807e40e36bfd"
+    },
+    "LiberationSansWeb-Italic.latin.woff2": {
+      "bytes": 20264,
+      "sha256": "1b4fe99bd80515a79d1e3c9801d3e210b6c571278fd1344d26dcf1380b6cf633"
+    },
+    "LiberationSansWeb-Italic.math.woff2": {
+      "bytes": 6552,
+      "sha256": "d660868b51286b5ce943d72f2965c05ca440d1462db7d3cefcacc53074271b18"
+    },
+    "LiberationSansWeb-Regular.cyrillic.woff2": {
+      "bytes": 26680,
+      "sha256": "886974521d895597478e7fc25d7b723f56d7b940dd41a86ae2b219ec15e287e2"
+    },
+    "LiberationSansWeb-Regular.greek.woff2": {
+      "bytes": 19420,
+      "sha256": "b8d41318bc17088813f30d57deeed51d348081edce4b59a515829ca395dac4e6"
+    },
+    "LiberationSansWeb-Regular.latin-ext.woff2": {
+      "bytes": 32752,
+      "sha256": "b78398894a9417c9434be39ea4300020628a0aa184aa717a4c3b8e00358638d8"
+    },
+    "LiberationSansWeb-Regular.latin.woff2": {
+      "bytes": 19740,
+      "sha256": "8a876ff043d1700ab2ee4e2271ae31c8b8d888b3f5d1f7e8ed0ad49d7fe70c5c"
+    },
+    "LiberationSansWeb-Regular.math.woff2": {
+      "bytes": 5952,
+      "sha256": "c7f22e24ac5c38ef410a86a124222b250f8edccc57f4ceeaade3da4973cdb1af"
+    },
+    "LiberationSansWeb.css": {
+      "bytes": 4271,
+      "sha256": "b4d589471f93d63eb1de2bf5fd49d72b60d39fb1ec47bd31b3d17d648db702e4"
+    },
+    "LiberationSerifWeb-Bold.cyrillic.woff2": {
+      "bytes": 30488,
+      "sha256": "a38915c32278ca529bcf056a08d2e66b4a9c5e5d686c02e91ff2fba2df3df305"
+    },
+    "LiberationSerifWeb-Bold.greek.woff2": {
+      "bytes": 19728,
+      "sha256": "b861dafd32f79ca554652cb46c6c9611b54119b27e0645c0a9edea587e4e6314"
+    },
+    "LiberationSerifWeb-Bold.latin-ext.woff2": {
+      "bytes": 32232,
+      "sha256": "3c03604d5cdf4b2b0c2d222d7008539a61bfc21078cb8f979af28cc5f6363ea0"
+    },
+    "LiberationSerifWeb-Bold.latin.woff2": {
+      "bytes": 20236,
+      "sha256": "8541a59b855c24d807f22883c060ffb8dbb536c69b021210fed97430bada0800"
+    },
+    "LiberationSerifWeb-Bold.math.woff2": {
+      "bytes": 6424,
+      "sha256": "becaf76a86026820de07648fa842aaa789ae177a456ec4b791c82caa28438893"
+    },
+    "LiberationSerifWeb-BoldItalic.cyrillic.woff2": {
+      "bytes": 30884,
+      "sha256": "5ebf8219a0f397bc8a5a895c2e74720b048d23c7f5699cf7820ab9988d49f5c4"
+    },
+    "LiberationSerifWeb-BoldItalic.greek.woff2": {
+      "bytes": 19640,
+      "sha256": "57761b8388924940230911495822bf689a5b44ded36ccb56a55793c215c11b8e"
+    },
+    "LiberationSerifWeb-BoldItalic.latin-ext.woff2": {
+      "bytes": 31548,
+      "sha256": "6855a57507b3f1984faf9481b247a5783db8e249e560a6e383fac8d2db49a9b5"
+    },
+    "LiberationSerifWeb-BoldItalic.latin.woff2": {
+      "bytes": 20768,
+      "sha256": "1ec771a27a2d8ce3eec594d709ed0da315e1cf7bfced231ac3cdfd30b6cb3f63"
+    },
+    "LiberationSerifWeb-BoldItalic.math.woff2": {
+      "bytes": 7280,
+      "sha256": "30912d3eec8d0d1ad6bb5d2997bb127d4fb13103ee7bb1862ac23bb028b0a521"
+    },
+    "LiberationSerifWeb-Italic.cyrillic.woff2": {
+      "bytes": 30940,
+      "sha256": "2df21a32ed38a69e911a5c4bf2858e6ac837de6329376547df01d1b8ca48548a"
+    },
+    "LiberationSerifWeb-Italic.greek.woff2": {
+      "bytes": 20028,
+      "sha256": "f85c6e0cbec568f0127a3c0111b93d6ca54c064bdaad3a18393b41a36c9a0f38"
+    },
+    "LiberationSerifWeb-Italic.latin-ext.woff2": {
+      "bytes": 32180,
+      "sha256": "83cdc29ddd3af22ac21359195418a1cf0dee5f148158c3f8f888a091e38c3661"
+    },
+    "LiberationSerifWeb-Italic.latin.woff2": {
+      "bytes": 21624,
+      "sha256": "57ad9c7a19bf3e5a815618f026b808c0b78e301b58cf1140d08a8cc71cb43a0f"
+    },
+    "LiberationSerifWeb-Italic.math.woff2": {
+      "bytes": 7204,
+      "sha256": "d93b0772e2d2dde4cf06530ac089d1e9ed69ad0e4e1cc755649223554b14fa1c"
+    },
+    "LiberationSerifWeb-Regular.cyrillic.woff2": {
+      "bytes": 30324,
+      "sha256": "b3fdcd4de76eccad7b88c4c4ab1a81ea4662f3ec34ab9548a2b71c6a395a2396"
+    },
+    "LiberationSerifWeb-Regular.greek.woff2": {
+      "bytes": 19084,
+      "sha256": "331cf8d0603061db7997646a0b073eedeb92b87ec4a18035475320f7c772ec17"
+    },
+    "LiberationSerifWeb-Regular.latin-ext.woff2": {
+      "bytes": 33912,
+      "sha256": "fdbc2bd6e94ff87f12939b3bad03cdcf6dce9d4dd11074845e6d51c3ac5e7ff8"
+    },
+    "LiberationSerifWeb-Regular.latin.woff2": {
+      "bytes": 22600,
+      "sha256": "eda8584bbe995c7478c15d76235243a2f5ed6979b98af2b856e9628d70e70321"
+    },
+    "LiberationSerifWeb-Regular.math.woff2": {
+      "bytes": 6312,
+      "sha256": "042909b3c8796fcc5c98d25136e0df27a65737a8f8dc78574779473ed9e2d278"
+    },
+    "LiberationSerifWeb.css": {
+      "bytes": 4311,
+      "sha256": "f9fd8d7ab38f8995e6719770a7f5caf2e30a641fb1ca7cf455a110258626db96"
+    }
+  },
+  "additionalNotices": {
+    "LICENSE-Sans-Narrow.txt": "https://github.com/liberationfonts/liberation-sans-narrow/blob/main/License.txt",
+    "COPYING-Sans-Narrow": "https://github.com/liberationfonts/liberation-sans-narrow/blob/main/COPYING"
+  }
+}

@@ -20,7 +20,7 @@ const span=person=>{
 const plottable=people=>people.filter(person=>span(person));
 const scientists=records.filter(person=>belongsTo(person,'scientists'));
 const earlyScientists=scientists.filter(person=>{const years=span(person);return years&&years[0]<=1800&&years[1]>=1500;});
-const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'application/json',css:'text/css',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',ttf:'font/ttf'};
+const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'application/json',css:'text/css',svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',woff2:'font/woff2'};
 (async()=>{
   const server=http.createServer((req,res)=>{
     const url=new URL(req.url,'http://localhost');
@@ -48,9 +48,33 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
   const closeMenu=async()=>page.locator('#workspace-menu [data-action="close-menu"]').click();
   const menuClosed=async()=>assert.equal(await page.locator('#workspace-menu').evaluate(el=>el.inert),true);
   const screenshot=async name=>page.screenshot({path:path.join(output,name+'.png'),fullPage:true});
+  const overviewControls = '.mo-topbar :is(.mo-btn, select)';
+  const workspaceControls = '#workspace-header :is(button, select)';
+  const checkGeometry = async (selector, {controls=false, sameRow=false}={}) => {
+    const boxes = await page.locator(selector).evaluateAll(elements =>
+      elements.filter(el => el.checkVisibility()).map(el => ({
+        label: el.getAttribute('aria-label') || el.id || el.className,
+        radius: getComputedStyle(el).borderRadius,
+        height: el.getBoundingClientRect().height,
+        top: el.getBoundingClientRect().top
+      }))
+    );
+    assert(boxes.length, 'Expected visible elements for ' + selector);
+    for (const box of boxes) {
+      assert.equal(box.radius, '0px', 'Square corners on ' + box.label);
+      if (controls) assert.equal(box.height, 44, '44 px outer height on ' + box.label);
+      if (sameRow) assert.equal(box.top, boxes[0].top, 'Aligned upper edge on ' + box.label);
+    }
+  };
   fs.mkdirSync(output,{recursive:true});
   try{
     await page.goto(base+'/app/');await ready();
+    await page.evaluate(() => document.fonts.ready.then(() => true));
+    assert(requests.some(url => url.endsWith('.latin.woff2')), 'Local Liberation web-font subsets load');
+    await checkGeometry(overviewControls, {controls:true, sameRow:true});
+    await checkGeometry('.category-card, .category-icon, .preview, .preview-bar, .selection-tray, .category-top input');
+    const cardHeights = await page.locator('.category-card').evaluateAll(cards => cards.map(card => card.getBoundingClientRect().height));
+    assert(Math.max(...cardHeights)-Math.min(...cardHeights) < 1, 'Category cards align across desktop rows');
     assert.equal(await page.locator('.category-card').count(),contentCategories.length);
     assert.equal(await page.locator('[data-action="open"]').isDisabled(),true);
     await screenshot('overview-desktop');
@@ -69,6 +93,8 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     assert.deepEqual((await page.locator('.person-label').evaluateAll(links=>links.map(link=>link.dataset.person))).sort(),plottable(womenInMath).map(p=>p.id).sort());
     await page.locator('#person-search').fill('');await page.waitForTimeout(300);
     await page.waitForSelector('.vis-item.vis-range:visible');
+    await checkGeometry('#workspace-menu :is(.mo-select, .mo-input, .mo-btn)', {controls:true});
+    await checkGeometry('.timeline-frame, .vis-item.vis-range, .workspace-menu, .chip');
     await closeMenu();
     await screenshot('women-timeline');
     await openMenu();
@@ -89,6 +115,7 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     await page.waitForSelector('.vis-timeline');
     await menuClosed();
     const canvas=await page.locator('#timeline').boundingBox();
+    await checkGeometry(workspaceControls, {controls:true, sameRow:true});
     const header=await page.locator('#workspace-header').boundingBox();
     assert.equal(canvas.x,0,'Timeline spans the full viewport width');
     assert.equal(canvas.y,header.height,'The header sits above the first person row');
@@ -164,6 +191,8 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     assert.equal(panel.width,1440*.4,'Person panel uses 40 percent of the desktop width');
     assert.equal(panel.x+panel.width,1440,'Person panel is attached to the right edge');
     assert.equal(panel.height,1000,'Person panel fills the viewport height');
+    await checkGeometry('#person-dialog .dialog-toolbar :is(button, select)', {controls:true, sameRow:true});
+    await checkGeometry('#person-dialog, #person-dialog :is(.portrait, .portrait-placeholder)');
     assert.equal(await page.locator('#person-dialog').evaluate(el=>el.matches(':modal')),false);
     await page.locator('[data-action="pan-right"]').click();
     assert.equal(url().searchParams.get('person'),'rene-descartes','Timeline stays interactive with a person open');
@@ -194,6 +223,12 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     await page.locator('#workspace-menu [data-action="reset-search"]').click();
     await page.locator('[data-action="show-list"]').click();
     assert.equal(await page.locator('tbody tr').count(),scientists.length);
+    assert.equal(await page.locator('#workspace-title').innerText(), 'People list');
+    assert.equal(await page.locator('#in-view').innerText(), 'People: ' + scientists.length);
+    const listRegion = page.getByRole('region', {name:'People list', exact:true});
+    await listRegion.focus();
+    await page.keyboard.press('Tab');
+    assert(await page.locator('tbody a').first().evaluate(el => el === document.activeElement));
     await menuClosed();
     await page.locator('[data-action="theme"]').click();
     await screenshot('list-dark');
@@ -218,6 +253,8 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
       await page.waitForSelector('.person-label:visible',{timeout:5000});
       await page.waitForSelector('.vis-item.vis-range:visible',{timeout:5000});
       const headerBox=await page.locator('#workspace-header').boundingBox();
+      await checkGeometry(workspaceControls, {controls:true});
+      await checkGeometry('.workspace-header .axis-tools button', {controls:true, sameRow:true});
       const timelineBox=await page.locator('#timeline').boundingBox();
       assert.equal(timelineBox.y,headerBox.height);
       assert.equal(timelineBox.height+headerBox.height,900);
@@ -242,6 +279,13 @@ const mime={html:'text/html',mjs:'text/javascript',js:'text/javascript',json:'ap
     assert.equal(await page.locator('html').getAttribute('lang'),'de');
     assert.match(await page.locator('.notice').textContent(),/noch nicht verfügbar/);
     await screenshot('overview-mobile');await noOverflow();
+    await checkGeometry(overviewControls, {controls:true, sameRow:true});
+    await page.goto(base+'/app/?lang=de&view=timeline&display=list&categories=computing');await ready();
+    const titleBox = await page.locator('#workspace-title').boundingBox();
+    const preferencesBox = await page.locator('.workspace-preferences').boundingBox();
+    assert.equal(await page.locator('#workspace-title').innerText(), 'Personenliste');
+    assert(titleBox.y >= preferencesBox.y + preferencesBox.height, 'The German list heading fits below the controls at 320 px');
+    await noOverflow();
     // The entire expanded collection must remain usable, including undated lives in the list.
     await page.setViewportSize({width:1440,height:1000});
     await page.goto(base+'/app/');await ready();

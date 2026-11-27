@@ -29,4 +29,6 @@ The runner starts its own local server and routes the configuration only inside 
 
 Workspace checks cover the compact responsive header, automatic menu collapse, backdrop dismissal, Escape priority, focus containment and restoration, inactive background controls, the full viewport without page scrolling, unchanged canvas and plot geometry when the left menu opens or closes, preservation of the time window, the 40% right-hand person panel, timeline interaction while that panel is open, and the switch between non-modal desktop and modal narrow-screen details.
 
+The runner measures the rendered 44 px control heights, aligned toolbar edges and square corners on cards, form controls, timeline bars and the person panel. It checks WOFF2 subset loading and keyboard access from the named list region to the first biography.
+
 Automated checks do not establish historical accuracy, native-language review or full assistive-technology conformance.
